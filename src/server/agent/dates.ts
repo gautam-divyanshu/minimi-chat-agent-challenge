@@ -66,3 +66,81 @@ export function mentionsTimeWindow(text: string): boolean {
   if (/\b(19|20)\d{2}\b/.test(text)) return true
   return chrono.parse(text).some((r) => !/^(right )?now$|^today$|^tonight$|^this (minute|moment)$/i.test(r.text.trim()))
 }
+
+// --- Relative dates → exact dates, done by the harness, not the model ---------
+
+export type ResolvedDate = {
+  /** The user's words, e.g. "last Tuesday". */
+  text: string
+  /** Inclusive calendar days in the user's timezone (YYYY-MM-DD). */
+  from: string
+  to: string
+  /** Why it is a range, when that isn't obvious. */
+  note?: string
+}
+
+const isoDay = (ms: number, timeZone: string) => new Intl.DateTimeFormat('en-CA', { timeZone }).format(ms)
+const addDays = (iso: string, days: number) => {
+  const [y, m, d] = iso.split('-').map(Number)
+  return new Date(Date.UTC(y, m - 1, d + days)).toISOString().slice(0, 10)
+}
+const weekday = (iso: string) => new Intl.DateTimeFormat('en-US', { timeZone: 'UTC', weekday: 'long' }).format(new Date(`${iso}T12:00:00Z`))
+
+/**
+ * Find date expressions in the user's message and turn each into exact days.
+ * The model gets these as facts ("Monday" → 2026-11-09) so it never does date
+ * arithmetic, and the harness uses them to enforce search date filters.
+ *
+ * - a named day ("on 3 November", "Monday", "yesterday") → that day
+ * - "since X", or a look-back ("last 48 hours", "past 3 days", "last week") → X up to today
+ * - a month ("in October") → the whole month
+ * - "last <weekday>" → both candidates: on a Wednesday, "last Tuesday" may mean
+ *   yesterday or the Tuesday of the week before
+ */
+export function resolveDates(text: string, now: number, timeZone: string): ResolvedDate[] {
+  const today = isoDay(now, timeZone)
+  const results = chrono.parse(text, { instant: new Date(now), timezone: tzOffsetMs(now, timeZone) / 60_000 }, { forwardDate: false })
+  const out: ResolvedDate[] = []
+
+  for (const r of results) {
+    const phrase = r.text.trim()
+    if (/^(right )?now$|^today$|^tonight$|^this (minute|moment)$/i.test(phrase)) continue
+    const start = isoDay(r.start.date().getTime(), timeZone)
+    if (start > today) continue // future dates say nothing about history or what was published
+
+    const before = text.slice(Math.max(0, r.index - 12), r.index)
+    const since = /\b(since|after|from)\s+(the\s+)?$/i.test(before)
+    const lookBack = /\b(last|past|previous)\s+(\d+|few|couple|week|month|year)|\bago\b|\bthis (week|month|year)\b/i.test(phrase)
+    const lastWeekday = /^last\s+(mon|tue|wed|thu|fri|sat|sun)/i.test(phrase)
+    const wholeMonth = r.start.isCertain('month') && !r.start.isCertain('day') && !lookBack
+
+    if (r.end) {
+      out.push({ text: phrase, from: start, to: isoDay(r.end.date().getTime(), timeZone) })
+    } else if (wholeMonth) {
+      const [y, m] = start.split('-').map(Number)
+      const last = new Date(Date.UTC(y, m, 0)).toISOString().slice(0, 10)
+      out.push({ text: phrase, from: `${start.slice(0, 8)}01`, to: last < today ? last : today })
+    } else if (lastWeekday && !since) {
+      const earlier = addDays(start, -7)
+      out.push({
+        text: phrase,
+        from: earlier,
+        to: start,
+        note: `ambiguous: ${weekday(start)} ${start} or ${weekday(earlier)} ${earlier}; check both`,
+      })
+    } else if (since || lookBack) {
+      out.push({ text: since && !lookBack ? `since ${phrase}` : phrase, from: start, to: today })
+    } else {
+      out.push({ text: phrase, from: start, to: start })
+    }
+  }
+  return out
+}
+
+/** One line per expression, for the system prompt. */
+export function formatDateHints(dates: ResolvedDate[]): string[] {
+  return dates.map((d) => {
+    const range = d.from === d.to ? `${d.from} (${weekday(d.from)})` : `${d.from} to ${d.to}`
+    return `"${d.text}" = ${range}${d.note ? ` [${d.note}]` : ''}`
+  })
+}

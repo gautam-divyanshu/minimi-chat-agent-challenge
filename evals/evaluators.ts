@@ -97,6 +97,15 @@ export function citations(output: MultiTurnResult, target: MultiTurnTarget): num
   return must.length === 0 ? 1 : must.filter((d) => citedHosts.has(d)).length / must.length
 }
 
+/** Short enough, and no more code blocks than asked for. 1 when the case sets no limit. */
+export function brevity(output: MultiTurnResult, target: MultiTurnTarget): number {
+  const words = output.answer.trim().split(/\s+/).filter(Boolean).length
+  if (target.maxWords !== undefined && words > target.maxWords) return 0
+  const fences = (output.answer.match(/^\s*```/gm) ?? []).length / 2
+  if (target.maxFences !== undefined && fences > target.maxFences) return 0
+  return 1
+}
+
 /** A number is cited to the page it came from: every line stating it links the right domain. */
 export function attribution(output: MultiTurnResult, target: MultiTurnTarget): number {
   for (const rule of target.attribution ?? []) {
@@ -120,6 +129,9 @@ export function cleanOutput(output: MultiTurnResult): number {
 
 // --- LLM judge ------------------------------------------------------------------
 
+/** The judge's explanation per answer, for the terminal report. */
+export const judgeReasons = new Map<string, string>()
+
 const judgeSchema = z.object({
   score: z.number().min(1).max(10),
   reason: z.string(),
@@ -135,14 +147,14 @@ export async function llmJudge(output: MultiTurnResult, target: MultiTurnTarget,
     providerOptions: { openai: { reasoningEffort: 'high' } },
     output: Output.object({ schema: judgeSchema }),
     system: `You grade answers from a research assistant that has two tools: web_search and recall_history (its record of past conversations with this user).
-Today is ${new Date(EVAL_NOW).toDateString()}. The tool results below are the ONLY facts available; they are test fixtures, so treat them as true even if they differ from what you know.
+Today is ${new Date(EVAL_NOW).toDateString()}. When there are several user messages, the FINAL ANSWER replies to the LAST one; earlier messages are context and need not be answered again. The tool results below are the ONLY facts available; they are test fixtures, so treat them as true even if they differ from what you know.
 
 Score 1-10:
 10: does exactly what the rubric describes; every number and claim matches the tool results and is attributed to the right source
 7-9: correct, with minor issues (wording, a missing secondary detail)
 4-6: partly correct; misses a required element, or includes a claim the tool results do not support
 1-3: wrong, invents facts or past conversations, or contradicts the tool results`,
-    prompt: `USER MESSAGES:\n${data.prompts.map((p, i) => `${i + 1}. ${p}`).join('\n')}
+    prompt: `${data.prompts.length > 1 ? `EARLIER IN THE CONVERSATION (context only, already answered):\n${data.prompts.slice(0, -1).join('\n')}\n\n` : ''}USER MESSAGE BEING ANSWERED:\n${data.prompts.at(-1)}
 
 TOOLS CALLED (in order): ${output.toolNames.join(', ') || 'none'}
 
@@ -152,5 +164,6 @@ FINAL ANSWER:\n${output.answer}
 
 RUBRIC (what a correct answer does):\n${target.rubric}`,
   })
+  judgeReasons.set(output.answer, verdict.reason)
   return verdict.score / 10
 }

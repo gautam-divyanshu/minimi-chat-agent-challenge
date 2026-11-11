@@ -1,4 +1,5 @@
 import { mkdirSync, writeFileSync } from 'node:fs'
+import { judgeReasons } from './evaluators'
 
 /**
  * Laminar keeps the full results; this prints the part you want in the
@@ -39,6 +40,8 @@ export function withReport<E extends Record<string, Evaluator>>(group: string, e
       }
       const text = r.output?.answer ?? r.output?.text
       if (text) console.log(`  answer: ${String(text).replace(/\s+/g, ' ').slice(0, 600)}`)
+      const reason = judgeReasons.get(r.output?.answer)
+      if (reason && (r.scores.judge ?? 1) < 1) console.log(`  judge: ${reason.replace(/\s+/g, ' ').slice(0, 400)}`)
     }
     mkdirSync('evals/results', { recursive: true })
     writeFileSync(`evals/results/${group}.json`, JSON.stringify(all.map(({ name, scores }) => ({ name, scores })), null, 2))

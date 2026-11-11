@@ -80,6 +80,21 @@ describe('web_search', () => {
     expect(out.note).toMatch(/Date filter ignored/)
   })
 
+  it("applies the user's window when the model leaves `since` out", () => {
+    const { tool } = fakeExa({ undated: [], dated: [] }, { allowDates: true, defaultSince: '2026-11-09' })
+    // The model wrote "last 48 hours" into the query instead of setting the filter.
+    expect(tool.refineInput!({ query: 'Supabase releases last 48 hours', objective: 'o' })).toMatchObject({ since: '2026-11-09' })
+    // An explicit value from the model wins; an empty string counts as absent.
+    expect(tool.refineInput!({ query: 'q', objective: 'o', since: '2026-11-01' }).since).toBe('2026-11-01')
+    expect(tool.refineInput!({ query: 'q', objective: 'o', since: '' }).since).toBe('2026-11-09')
+    expect(tool.inputSchema.safeParse({ query: 'q', objective: 'o', since: '' }).success).toBe(true)
+  })
+
+  it('strips dates when the user gave no window, so the status line never shows a filter that is not applied', () => {
+    const { tool } = fakeExa({ undated: [], dated: [] }, { allowDates: false, defaultSince: '2026-11-09' })
+    expect(tool.refineInput!({ query: 'q', objective: 'o', since: '2026-01-01' })).toMatchObject({ since: undefined, until: undefined })
+  })
+
   it('requires objective and real dates in the model-facing schema', () => {
     const { tool } = fakeExa({ undated: [], dated: [] })
     expect(tool.inputSchema.safeParse({ query: 'q' }).success).toBe(false)

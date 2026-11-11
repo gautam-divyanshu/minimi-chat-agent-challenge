@@ -73,6 +73,9 @@ export type MultiTurnTarget = {
   /** Domains that must / must not be cited as links in the final answer. */
   mustCite?: string[]
   mustNotCite?: string[]
+  /** Upper bounds on the final answer: word count, and number of fenced code blocks. */
+  maxWords?: number
+  maxFences?: number
   /** Any line stating `value` (regex) must link `domain`: the number is cited to the page it came from. */
   attribution?: { value: string; domain: string }[]
   /** What a correct answer does, for the LLM judge. */

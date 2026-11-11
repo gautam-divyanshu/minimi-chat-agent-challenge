@@ -19,7 +19,8 @@ import { defineTool } from '../tool'
 
 type ExaClient = Pick<Exa, 'search'>
 
-const isoDate = z.iso.date().describe('YYYY-MM-DD')
+// Models sometimes send "" for an optional date; accept it and treat it as absent.
+const isoDate = z.union([z.iso.date(), z.literal('')]).describe('YYYY-MM-DD')
 
 const inputSchema = z.object({
   query: z.string().min(1).describe('Describe the ideal page, in natural language. Put recency ("latest", "2026") here.'),
@@ -57,6 +58,12 @@ export type WebSearchOptions = {
   maxCharacters?: number
   /** False when the user gave no time window: since/until are then ignored. */
   allowDates?: boolean
+  /**
+   * Start of the window the user stated, resolved by the harness (YYYY-MM-DD).
+   * Applied when the model leaves `since` out: it tends to write "last 48
+   * hours" into the query text instead of setting the filter.
+   */
+  defaultSince?: string
 }
 
 export function createWebSearch(getClient: () => ExaClient = defaultClient, opts: WebSearchOptions = {}) {
@@ -65,6 +72,12 @@ export function createWebSearch(getClient: () => ExaClient = defaultClient, opts
     description: `${DEFAULT_WEB_SEARCH_TOOL_DESCRIPTION} Searches the live web; use it for anything current (prices, releases, news, changelogs). Independent lookups should be separate calls in the same turn so they run in parallel.`,
     inputSchema,
     timeoutMs: 15_000,
+    refineInput(input) {
+      const since = input.since || undefined
+      const until = input.until || undefined
+      if (opts.allowDates === false) return { ...input, since: undefined, until: undefined }
+      return { ...input, since: since ?? opts.defaultSince, until }
+    },
     async execute({ query, objective, since, until }, { signal }): Promise<WebSearchOutput> {
       const exa = getClient()
       const search = (dated: boolean) =>

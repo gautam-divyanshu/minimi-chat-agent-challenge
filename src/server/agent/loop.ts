@@ -41,6 +41,8 @@ export type LoopOptions = {
   tools: AgentTool[]
   /** Model calls per turn. The last one is forced to answer (no tools). */
   maxSteps?: number
+  /** Appended to the system prompt on that forced last step. */
+  finalStepNote?: string
   onEvent: (event: AgentEvent) => void
   /** Called as each tool finishes, with full input/output (for persistence). */
   onToolRun?: (run: ToolRun) => void
@@ -79,7 +81,7 @@ export async function runAgentLoop(opts: LoopOptions): Promise<LoopResult> {
     const lastStep = step === maxSteps - 1
     const result = streamText({
       model,
-      system,
+      system: lastStep && opts.finalStepNote ? `${system}\n\n${opts.finalStepNote}` : system,
       messages,
       tools: sdkTools,
       // On the final step the model must answer with what it has.
@@ -175,31 +177,36 @@ async function runTool(
   parentSignal?: AbortSignal,
 ): Promise<ToolRun> {
   const startedAt = Date.now()
-  onEvent({ type: 'tool_started', callId: call.callId, tool: call.tool, input: call.input })
 
-  let output: unknown = null
+  // Validate first, so the event, the run and the saved record all carry the
+  // input that actually executes.
+  let input: unknown = call.input
   let error: string | undefined
   if (!tool) error = `unknown tool: ${call.tool}`
   else if (call.invalid) error = `invalid input: ${call.invalid}`
   else {
     const parsed = tool.inputSchema.safeParse(call.input)
     if (!parsed.success) error = `invalid input: ${parsed.error.message}`
-    else {
-      const timeout = AbortSignal.timeout(tool.timeoutMs)
-      const signal = parentSignal ? AbortSignal.any([parentSignal, timeout]) : timeout
-      try {
-        output = await raceAbort(tool.execute(parsed.data, { signal }), signal)
-      } catch (err) {
-        // Errors become tool results the model can reason about; never thrown.
-        error = timeout.aborted ? 'timeout' : errorMessage(err)
-      }
+    else input = tool.refineInput ? tool.refineInput(parsed.data) : parsed.data
+  }
+  onEvent({ type: 'tool_started', callId: call.callId, tool: call.tool, input })
+
+  let output: unknown = null
+  if (tool && !error) {
+    const timeout = AbortSignal.timeout(tool.timeoutMs)
+    const signal = parentSignal ? AbortSignal.any([parentSignal, timeout]) : timeout
+    try {
+      output = await raceAbort(tool.execute(input, { signal }), signal)
+    } catch (err) {
+      // Errors become tool results the model can reason about; never thrown.
+      error = timeout.aborted ? 'timeout' : errorMessage(err)
     }
   }
 
   const durationMs = Date.now() - startedAt
   const sources = !error && tool?.sources ? safe(() => tool.sources!(output)) ?? [] : []
   onEvent({ type: 'tool_finished', callId: call.callId, tool: call.tool, sources, durationMs, error })
-  return { callId: call.callId, tool: call.tool, input: call.input, output, startedAt, durationMs, error }
+  return { callId: call.callId, tool: call.tool, input, output, startedAt, durationMs, error }
 }
 
 /** Resolve with the promise, or reject as soon as the signal aborts (even if the tool ignores it). */

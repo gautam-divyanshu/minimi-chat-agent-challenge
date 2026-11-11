@@ -160,8 +160,7 @@
     "target": {
       "category": "secondary",
       "expectedTools": [
-        "recall_history",
-        "web_search"
+        "recall_history"
       ]
     }
   },

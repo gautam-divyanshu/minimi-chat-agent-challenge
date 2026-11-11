@@ -143,6 +143,28 @@ describe('runAgentLoop', () => {
     expect(results.sort()).toEqual(['call_0_0', 'call_0_1'])
   })
 
+  it('runs, reports and records the input after the harness refined it', async () => {
+    const seen: unknown[] = []
+    const dated = defineTool({
+      name: 'web_search',
+      description: 's',
+      inputSchema: z.object({ query: z.string(), since: z.string().optional() }),
+      timeoutMs: 1000,
+      refineInput: (input) => ({ ...input, since: input.since ?? '2026-11-09' }),
+      async execute(input) {
+        seen.push(input)
+        return { results: [] }
+      },
+    })
+    const model = scriptedModel([{ calls: [{ name: 'web_search', input: { query: 'x' } }] }, { text: 'ok' }])
+    const { events, onEvent } = collect()
+    const res = await runAgentLoop({ model, system: 's', messages: user('q'), tools: [dated], onEvent })
+    const expected = { query: 'x', since: '2026-11-09' }
+    expect(seen).toEqual([expected])
+    expect(events.find((e) => e.type === 'tool_started')).toMatchObject({ input: expected })
+    expect(res.toolRuns[0].input).toEqual(expected)
+  })
+
   it('caps steps and forces a final answer without tools', async () => {
     const model = scriptedModel([
       { calls: [{ name: 'web_search', input: { query: 'x' } }] }, // model keeps wanting to search
@@ -160,5 +182,13 @@ describe('runAgentLoop', () => {
     expect(res.steps).toBe(3)
     expect(choices).toEqual(['auto', 'auto', 'none'])
     expect(res.text).toBe('Best answer so far.')
+  })
+
+  it('tells the model on the forced last step to answer from what it has', async () => {
+    const model = scriptedModel([{ calls: [{ name: 'web_search', input: { query: 'x' } }] }, { text: 'done' }])
+    await runAgentLoop({ model, system: 'RULES', finalStepNote: 'ANSWER NOW', messages: user('q'), tools: [search], maxSteps: 2, ...collect() })
+    const systems = model.doStreamCalls.map((c) => JSON.stringify(c.prompt[0]))
+    expect(systems[0]).not.toContain('ANSWER NOW')
+    expect(systems[1]).toContain('ANSWER NOW')
   })
 })

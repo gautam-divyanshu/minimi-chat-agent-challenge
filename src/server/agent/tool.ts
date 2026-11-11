@@ -11,6 +11,11 @@ export interface AgentTool<I = any, O = any> {
   inputSchema: z.ZodType<I>
   /** Hard limit; on expiry the model gets `{ error: "timeout" }`. */
   timeoutMs: number
+  /**
+   * Harness-side correction of the model's input before it runs (e.g. apply the
+   * user's date window). The corrected input is what gets shown, run and saved.
+   */
+  refineInput?(input: I): I
   execute(input: I, ctx: { signal: AbortSignal }): Promise<O>
   /** Pull citable sources out of the output, for the UI's source chips. */
   sources?(output: O): Source[]

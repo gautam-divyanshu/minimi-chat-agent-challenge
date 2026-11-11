@@ -435,5 +435,223 @@
       ],
       "rubric": "Understands that the follow-up refers to Nimbus DB. Says the Free plan costs $0 and includes up to 1 GB of storage."
     }
+  },
+  {
+    "data": {
+      "name": "code in fenced blocks, one language",
+      "prompts": [
+        "Write binary search code."
+      ]
+    },
+    "target": {
+      "forbiddenTools": [
+        "web_search",
+        "recall_history"
+      ],
+      "mustMention": [
+        "```\\w+"
+      ],
+      "maxFences": 1,
+      "rubric": "Gives a correct binary search implementation in ONE programming language, inside a fenced code block. May offer other languages in a sentence, but does not print several."
+    }
+  },
+  {
+    "data": {
+      "name": "what can you do: short and specific",
+      "prompts": [
+        "hi, what can you do?"
+      ]
+    },
+    "target": {
+      "forbiddenTools": [
+        "web_search",
+        "recall_history"
+      ],
+      "maxWords": 90,
+      "mustMention": [
+        "search",
+        "(past|earlier|previous) (chats|conversations)|remember|memory"
+      ],
+      "rubric": "A short answer (about three lines) naming this agent's actual strengths: live web search with cited sources, memory of past conversations, and checking whether earlier answers still hold. Not a generic list of ten capabilities."
+    }
+  },
+  {
+    "data": {
+      "name": "general knowledge: brief, no search",
+      "prompts": [
+        "What is a vector database?"
+      ]
+    },
+    "target": {
+      "forbiddenTools": [
+        "recall_history"
+      ],
+      "maxWords": 170,
+      "rubric": "A correct, compact explanation of a vector database (stores embeddings, similarity search, typical uses) in roughly 120 words. No padding."
+    }
+  },
+  {
+    "data": {
+      "name": "same-chat fact needs no recall",
+      "prompts": [
+        "My name is Arjun and I run a 20-person sales team.",
+        "What's my name?"
+      ]
+    },
+    "target": {
+      "forbiddenTools": [
+        "recall_history",
+        "web_search"
+      ],
+      "mustMention": [
+        "Arjun"
+      ],
+      "rubric": "Answers that the user's name is Arjun, from the current conversation, without looking up past conversations."
+    }
+  },
+  {
+    "data": {
+      "name": "'last 48 hours' becomes a date filter",
+      "prompts": [
+        "What has Supabase shipped in the last 48 hours?"
+      ],
+      "pages": [
+        {
+          "match": [
+            "supabase"
+          ],
+          "url": "https://github.com/supabase/cli/releases/tag/v2.60.0",
+          "title": "Release v2.60.0 \u00b7 supabase/cli",
+          "publishedDate": "2026-11-11",
+          "text": "Supabase CLI v2.60.0, released 11 November 2026: adds `supabase db advisors` and faster local start."
+        },
+        {
+          "match": [
+            "supabase"
+          ],
+          "url": "https://supabase.com/changelog",
+          "title": "Changelog | Supabase",
+          "text": "Changelog. 28 October 2026: Realtime broadcast from database is generally available. 14 October 2026: new dashboard home."
+        },
+        {
+          "match": [
+            "supabase"
+          ],
+          "url": "https://supabase.com/blog/launch-week-recap",
+          "title": "Launch Week recap",
+          "publishedDate": "2026-10-30",
+          "text": "Everything we shipped in Launch Week, October 2026."
+        }
+      ]
+    },
+    "target": {
+      "expectedToolOrder": [
+        "web_search"
+      ],
+      "args": [
+        {
+          "tool": "web_search",
+          "arg": "since",
+          "oneOf": [
+            "2026-11-09",
+            "2026-11-10"
+          ]
+        }
+      ],
+      "mustMention": [
+        "2\\.60|CLI"
+      ],
+      "mustCite": [
+        "github.com"
+      ],
+      "rubric": "Reports the Supabase CLI v2.60.0 release of 11 November 2026 as what shipped in the last 48 hours. Does not present the October items (Realtime broadcast, dashboard home, Launch Week) as shipped in the last 48 hours."
+    }
+  },
+  {
+    "data": {
+      "name": "stable versions only",
+      "prompts": [
+        "What's the latest version of Node.js?"
+      ],
+      "pages": [
+        {
+          "match": [
+            "node"
+          ],
+          "url": "https://nodejs.org/en/about/previous-releases",
+          "title": "Node.js Releases",
+          "text": "Node.js v26.2.0 is the Current release. Node.js v24.11.1 is the Active LTS release (codename Krypton)."
+        },
+        {
+          "match": [
+            "node"
+          ],
+          "url": "https://nodejs.org/download/nightly/",
+          "title": "Index of /download/nightly/",
+          "publishedDate": "2026-11-11",
+          "text": "v27.0.0-nightly20261111a1b2c3 v27.0.0-alpha.0.0.0"
+        }
+      ]
+    },
+    "target": {
+      "expectedToolOrder": [
+        "web_search"
+      ],
+      "mustMention": [
+        "24\\.11\\.1",
+        "26\\.2\\.0"
+      ],
+      "mustNotMention": [
+        "alpha|nightly|v?27\\."
+      ],
+      "mustCite": [
+        "nodejs.org"
+      ],
+      "rubric": "Gives the stable versions: v26.2.0 (Current) and v24.11.1 (Active LTS). Does not mention nightly or alpha builds."
+    }
+  },
+  {
+    "data": {
+      "name": "does the arithmetic the question implies",
+      "prompts": [
+        "We're a 20-person sales team. What would HubSpot Sales Hub Starter and Pipedrive Advanced cost us per month?"
+      ],
+      "pages": [
+        {
+          "match": [
+            "hubspot"
+          ],
+          "url": "https://www.hubspot.com/pricing/sales",
+          "title": "Sales Hub Pricing | HubSpot",
+          "text": "Sales Hub Starter: $20 per seat per month."
+        },
+        {
+          "match": [
+            "pipedrive"
+          ],
+          "url": "https://www.pipedrive.com/en/pricing",
+          "title": "Pipedrive Pricing",
+          "text": "Advanced: $29 per seat per month."
+        }
+      ]
+    },
+    "target": {
+      "expectedToolOrder": [
+        "web_search"
+      ],
+      "minCalls": {
+        "tool": "web_search",
+        "count": 2
+      },
+      "mustMention": [
+        "\\$?400",
+        "\\$?580"
+      ],
+      "mustCite": [
+        "hubspot.com",
+        "pipedrive.com"
+      ],
+      "rubric": "Gives per-seat prices ($20 and $29) AND the monthly totals for 20 people: $400 for HubSpot Sales Hub Starter and $580 for Pipedrive Advanced."
+    }
   }
 ]

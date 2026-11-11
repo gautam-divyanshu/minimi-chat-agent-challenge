@@ -1,6 +1,6 @@
 import { streamText } from 'ai'
 import '../src/server/env'
-import { startOfDayMs } from '../src/server/agent/dates'
+import { formatDateHints, resolveDates, startOfDayMs } from '../src/server/agent/dates'
 import { runTurn } from '../src/server/agent/harness'
 import { toSdkTools } from '../src/server/agent/loop'
 import { getModel, MODEL_SETTINGS } from '../src/server/agent/model'
@@ -32,7 +32,12 @@ export async function singleTurn(data: SingleTurnData): Promise<SingleTurnResult
   const result = streamText({
     model: getModel(),
     providerOptions: MODEL_SETTINGS,
-    system: buildSystemPrompt({ now: new Date(EVAL_NOW), timezone: EVAL_TZ }),
+    // Same date hints the harness would give the model for this message.
+    system: buildSystemPrompt({
+      now: new Date(EVAL_NOW),
+      timezone: EVAL_TZ,
+      dateHints: formatDateHints(resolveDates(data.prompt, EVAL_NOW, EVAL_TZ)),
+    }),
     messages: [{ role: 'user', content: data.prompt }],
     tools: toSdkTools(tools),
     telemetry: (await getTracing()).telemetry,
@@ -89,8 +94,8 @@ export async function multiTurn(data: MultiTurnData): Promise<MultiTurnResult> {
       timezone: EVAL_TZ,
       now: EVAL_NOW + i * 60_000,
       getDb: () => handle,
-      tools: ({ timezone, beforeMs, allowDates }) => [
-        createWebSearch(() => exa as any, { numResults: 5, allowDates }),
+      tools: ({ timezone, beforeMs, allowDates, defaultSince }) => [
+        createWebSearch(() => exa as any, { numResults: 5, allowDates, defaultSince }),
         createRecallHistory({ timezone, beforeMs, getDb: () => handle }),
       ],
       emit: (e) => {

@@ -4,6 +4,7 @@ import dataset from './data/multi-turn.json'
 import {
   argsCorrect,
   attribution,
+  brevity,
   citations,
   cleanOutput,
   llmJudge,
@@ -36,6 +37,7 @@ evaluate({
     citations: (output, target) => citations(output, target!),
     attribution: (output, target) => attribution(output, target!),
     cleanOutput: (output) => cleanOutput(output),
+    brevity: (output, target) => brevity(output, target!),
     judge: (output, target, data) => llmJudge(output, target!, data!),
     // Not 0..1: seconds, to watch speed alongside quality.
     firstTextSeconds: (output) => output.firstTextSeconds,

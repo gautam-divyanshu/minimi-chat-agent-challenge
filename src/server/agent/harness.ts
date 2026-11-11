@@ -5,11 +5,11 @@ import { conversations, messages, toolEvents } from '../db/schema'
 import type { AgentEvent } from '#/shared/events'
 import { runAgentLoop } from './loop'
 import { getModel, MODEL_SETTINGS } from './model'
-import { buildSystemPrompt } from './prompt'
+import { buildSystemPrompt, FINAL_STEP_NOTE } from './prompt'
 import type { AgentTool } from './tool'
 import { createRecallHistory } from './tools/recall-history'
 import { createWebSearch } from './tools/web-search'
-import { mentionsTimeWindow } from './dates'
+import { formatDateHints, mentionsTimeWindow, resolveDates } from './dates'
 import { getTracing, type Tracing } from './tracing'
 import { cleanCitations } from '../../shared/citations'
 
@@ -30,7 +30,7 @@ export type TurnInput = {
   // Injection points for tests and evals:
   now?: number
   model?: LanguageModel
-  tools?: (ctx: { timezone: string; beforeMs: number; allowDates: boolean }) => AgentTool[]
+  tools?: (ctx: { timezone: string; beforeMs: number; allowDates: boolean; defaultSince?: string }) => AgentTool[]
   getDb?: typeof defaultGetDb
   tracing?: Tracing
 }
@@ -75,11 +75,16 @@ export async function runTurn(input: TurnInput): Promise<{ messageId: number }> 
   const recentUserText = history.filter((m) => m.role === 'user').slice(-3).map((m) => m.text)
   const allowDates = recentUserText.some(mentionsTimeWindow)
 
+  // Relative dates are resolved here, in the user's timezone, and handed to
+  // the model as facts. The earliest one is also the default search window.
+  const dates = resolveDates(text, now, timezone)
+  const defaultSince = dates.map((d) => d.from).sort()[0]
+
   const tools = input.tools
-    ? input.tools({ timezone, beforeMs: now, allowDates })
+    ? input.tools({ timezone, beforeMs: now, allowDates, defaultSince })
     : [
         // 5 results, not Exa's default 10: see the note in web-search.ts.
-        createWebSearch(undefined, { numResults: 5, allowDates }),
+        createWebSearch(undefined, { numResults: 5, allowDates, defaultSince }),
         createRecallHistory({ timezone, beforeMs: now }),
       ]
 
@@ -91,7 +96,8 @@ export async function runTurn(input: TurnInput): Promise<{ messageId: number }> 
       tracing,
       model: input.model ?? getModel(),
       providerOptions: MODEL_SETTINGS,
-      system: buildSystemPrompt({ now: new Date(now), timezone }),
+      finalStepNote: FINAL_STEP_NOTE,
+      system: buildSystemPrompt({ now: new Date(now), timezone, dateHints: formatDateHints(dates) }),
       messages: context,
       tools,
       signal,
