@@ -53,9 +53,10 @@ SQLite: conversations · messages · tool_events · claims · messages_fts
 - Rule: everything we query is a real column. Only tool input/output is JSON. Timestamps are UTC ms integers.
 
 ## Tools
-`web_search({ query, since?, until?, numResults? })`
-- Exa search + contents, published-date filters when since/until given
-- Trim results to title, url, published date, ~1,500 chars text
+`web_search({ query, objective, since?, until? })`
+- Follows Exa's build-with-exa skill: `type: "auto"`, `contents: { highlights: true }`, required `objective` (Exa's verbatim description), no numResults/category/domain filters
+- since/until → published-date filters, only for a window the user stated ("since Monday"), never for "latest"
+- Results: title, url, published date, highlights. ~25k chars per search at default 10 results; revisit in speed pass
 - Errors returned as tool results (`{ error: "timeout" }`), never thrown
 - If date filters return nothing (pricing pages often lack dates), retry without dates and say so
 
