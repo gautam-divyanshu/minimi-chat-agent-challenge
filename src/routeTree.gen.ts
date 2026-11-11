@@ -9,16 +9,17 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
-import { Route as IndexRouteImport } from './routes/index'
+import { Route as Char123ConversationIdChar125RouteImport } from './routes/{-$conversationId}'
 import { Route as ApiChatRouteImport } from './routes/api/chat'
 import { Route as ApiConversationsRouteImport } from './routes/api/conversations'
 import { Route as ApiConversationsIdRouteImport } from './routes/api/conversations.$id'
 
-const IndexRoute = IndexRouteImport.update({
-  id: '/',
-  path: '/',
-  getParentRoute: () => rootRouteImport,
-} as any)
+const Char123ConversationIdChar125Route =
+  Char123ConversationIdChar125RouteImport.update({
+    id: '/{-$conversationId}',
+    path: '/{-$conversationId}',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const ApiChatRoute = ApiChatRouteImport.update({
   id: '/api/chat',
   path: '/api/chat',
@@ -36,50 +37,58 @@ const ApiConversationsIdRoute = ApiConversationsIdRouteImport.update({
 } as any)
 
 export interface FileRoutesByFullPath {
-  '/': typeof IndexRoute
+  '/{-$conversationId}': typeof Char123ConversationIdChar125Route
   '/api/chat': typeof ApiChatRoute
   '/api/conversations': typeof ApiConversationsRouteWithChildren
   '/api/conversations/$id': typeof ApiConversationsIdRoute
 }
 export interface FileRoutesByTo {
-  '/': typeof IndexRoute
+  '/{-$conversationId}': typeof Char123ConversationIdChar125Route
   '/api/chat': typeof ApiChatRoute
   '/api/conversations': typeof ApiConversationsRouteWithChildren
   '/api/conversations/$id': typeof ApiConversationsIdRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
-  '/': typeof IndexRoute
+  '/{-$conversationId}': typeof Char123ConversationIdChar125Route
   '/api/chat': typeof ApiChatRoute
   '/api/conversations': typeof ApiConversationsRouteWithChildren
   '/api/conversations/$id': typeof ApiConversationsIdRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/api/chat' | '/api/conversations' | '/api/conversations/$id'
+  fullPaths:
+    | '/{-$conversationId}'
+    | '/api/chat'
+    | '/api/conversations'
+    | '/api/conversations/$id'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/api/chat' | '/api/conversations' | '/api/conversations/$id'
+  to:
+    | '/{-$conversationId}'
+    | '/api/chat'
+    | '/api/conversations'
+    | '/api/conversations/$id'
   id:
     | '__root__'
-    | '/'
+    | '/{-$conversationId}'
     | '/api/chat'
     | '/api/conversations'
     | '/api/conversations/$id'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
-  IndexRoute: typeof IndexRoute
+  Char123ConversationIdChar125Route: typeof Char123ConversationIdChar125Route
   ApiChatRoute: typeof ApiChatRoute
   ApiConversationsRoute: typeof ApiConversationsRouteWithChildren
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
-    '/': {
-      id: '/'
-      path: '/'
-      fullPath: '/'
-      preLoaderRoute: typeof IndexRouteImport
+    '/{-$conversationId}': {
+      id: '/{-$conversationId}'
+      path: '/{-$conversationId}'
+      fullPath: '/{-$conversationId}'
+      preLoaderRoute: typeof Char123ConversationIdChar125RouteImport
       parentRoute: typeof rootRouteImport
     }
     '/api/chat': {
@@ -118,7 +127,7 @@ const ApiConversationsRouteWithChildren =
   ApiConversationsRoute._addFileChildren(ApiConversationsRouteChildren)
 
 const rootRouteChildren: RootRouteChildren = {
-  IndexRoute: IndexRoute,
+  Char123ConversationIdChar125Route: Char123ConversationIdChar125Route,
   ApiChatRoute: ApiChatRoute,
   ApiConversationsRoute: ApiConversationsRouteWithChildren,
 }
