@@ -44,6 +44,9 @@ it('finds and cites the official pricing page', async () => {
   const { answer, results } = await ask('telling pricing of claude models')
   expect(results.some((r) => official(r.url) && /pricing/.test(r.url))).toBe(true)
   expect(answer).toMatch(/\]\(https:\/\/[^)]*(claude\.com|anthropic\.com)/)
+  // Every link is a bare URL: nothing like "(https://…, checked 2026-11-11)".
+  expect(answer).not.toMatch(/\]\(https?:\/\/[^)]*\s[^)]*\)/)
+  expect(answer).not.toMatch(/checked \d{4}-\d{2}-\d{2}/)
 })
 
 it('keeps the official page when the user does give a window', async () => {

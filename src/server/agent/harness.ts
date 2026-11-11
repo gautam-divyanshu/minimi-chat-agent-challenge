@@ -11,6 +11,7 @@ import { createRecallHistory } from './tools/recall-history'
 import { createWebSearch } from './tools/web-search'
 import { mentionsTimeWindow } from './dates'
 import { getTracing, type Tracing } from './tracing'
+import { cleanCitations } from '#/shared/citations'
 
 /**
  * One chat turn, end to end. Framework-free: the HTTP route, evals and a CLI
@@ -114,7 +115,8 @@ export async function runTurn(input: TurnInput): Promise<{ messageId: number }> 
     })
     // One trace per turn; conversations group as sessions in Laminar.
     const result = await tracing.span({ name: 'chat.turn', sessionId: conversationId, input: { text, timezone } }, loop)
-    answer = result.text
+    // Stored answers are what recall_history returns later: keep their links valid.
+    answer = cleanCitations(result.text)
   } catch (err) {
     const message = err instanceof Error ? err.message : String(err)
     console.error('turn failed', err)

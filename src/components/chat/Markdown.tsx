@@ -1,6 +1,7 @@
 import { memo, useMemo } from 'react'
 import ReactMarkdown, { type Components } from 'react-markdown'
 import remarkGfm from 'remark-gfm'
+import { cleanCitations } from '#/shared/citations'
 
 // Streaming markdown without re-parsing the whole answer on every token:
 // split into top-level blocks and memoize each one. While streaming, only the
@@ -43,7 +44,7 @@ const Block = memo(function Block({ text }: { text: string }) {
 })
 
 export function Markdown({ text }: { text: string }) {
-  const blocks = useMemo(() => splitBlocks(text), [text])
+  const blocks = useMemo(() => splitBlocks(cleanCitations(text)), [text])
   return (
     <div className="prose prose-sm prose-zinc max-w-none dark:prose-invert prose-p:my-2 prose-li:my-0.5 prose-ul:my-2 prose-a:font-normal prose-a:text-blue-600 prose-a:no-underline hover:prose-a:underline dark:prose-a:text-blue-400 prose-table:my-2 prose-th:text-left">
       {blocks.map((b, i) => (
