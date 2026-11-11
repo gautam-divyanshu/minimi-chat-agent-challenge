@@ -41,6 +41,8 @@ export type LoopOptions = {
   /** Model calls per turn. The last one is forced to answer (no tools). */
   maxSteps?: number
   onEvent: (event: AgentEvent) => void
+  /** Called as each tool finishes, with full input/output (for persistence). */
+  onToolRun?: (run: ToolRun) => void
   signal?: AbortSignal
 }
 
@@ -121,7 +123,13 @@ export async function runAgentLoop(opts: LoopOptions): Promise<LoopResult> {
     if (calls.length === 0) return { text, toolRuns, steps: step + 1, stepStats, messages }
 
     // Independent tool calls run in parallel (e.g. 5 CRM tools → 5 searches at once).
-    const runs = await Promise.all(calls.map((c) => runTool(c, byName.get(c.tool), onEvent, signal)))
+    const runs = await Promise.all(
+      calls.map(async (c) => {
+        const run = await runTool(c, byName.get(c.tool), onEvent, signal)
+        opts.onToolRun?.(run)
+        return run
+      }),
+    )
     toolRuns.push(...runs)
 
     // The SDK already answers invalid calls (unknown tool, unparseable input)
