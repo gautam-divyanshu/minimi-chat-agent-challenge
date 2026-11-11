@@ -11,7 +11,8 @@ dist-ssr
 .vinxi
 __unconfig*
 todos.json
-data/
+/data/
 *.db
 *.db-*
-harness-engineeringevals/results/
+harness-engineering
+evals/results/

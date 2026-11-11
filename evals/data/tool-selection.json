@@ -1,0 +1,249 @@
+[
+  {
+    "data": {
+      "prompt": "What does Supabase Pro cost right now?"
+    },
+    "target": {
+      "category": "golden",
+      "expectedTools": [
+        "web_search"
+      ],
+      "args": [
+        {
+          "tool": "web_search",
+          "arg": "since",
+          "absent": true
+        }
+      ]
+    }
+  },
+  {
+    "data": {
+      "prompt": "What's the latest stable version of Node.js?"
+    },
+    "target": {
+      "category": "golden",
+      "expectedTools": [
+        "web_search"
+      ],
+      "args": [
+        {
+          "tool": "web_search",
+          "arg": "since",
+          "absent": true
+        }
+      ]
+    }
+  },
+  {
+    "data": {
+      "prompt": "telling pricing of claude models"
+    },
+    "target": {
+      "category": "golden",
+      "expectedTools": [
+        "web_search"
+      ],
+      "args": [
+        {
+          "tool": "web_search",
+          "arg": "since",
+          "absent": true
+        },
+        {
+          "tool": "web_search",
+          "arg": "until",
+          "absent": true
+        }
+      ]
+    }
+  },
+  {
+    "data": {
+      "prompt": "Has HubSpot shipped anything big since Monday?"
+    },
+    "target": {
+      "category": "golden",
+      "expectedTools": [
+        "web_search"
+      ],
+      "args": [
+        {
+          "tool": "web_search",
+          "arg": "since",
+          "equals": "2026-11-09"
+        }
+      ]
+    }
+  },
+  {
+    "data": {
+      "prompt": "Compare current per-seat pricing of HubSpot, Pipedrive, Salesforce, Close and Attio for a 20-person sales team."
+    },
+    "target": {
+      "category": "golden",
+      "expectedTools": [
+        "web_search"
+      ],
+      "minCalls": {
+        "tool": "web_search",
+        "count": 5
+      }
+    }
+  },
+  {
+    "data": {
+      "prompt": "What did I ask you on 3 November?"
+    },
+    "target": {
+      "category": "golden",
+      "expectedTools": [
+        "recall_history"
+      ],
+      "forbiddenTools": [
+        "web_search"
+      ],
+      "args": [
+        {
+          "tool": "recall_history",
+          "arg": "from",
+          "equals": "2026-11-03"
+        },
+        {
+          "tool": "recall_history",
+          "arg": "to",
+          "equals": "2026-11-03"
+        }
+      ]
+    }
+  },
+  {
+    "data": {
+      "prompt": "Last Tuesday I asked you about Postgres hosting. Has any pricing changed since then?"
+    },
+    "target": {
+      "category": "golden",
+      "expectedTools": [
+        "recall_history"
+      ],
+      "args": [
+        {
+          "tool": "recall_history",
+          "arg": "query",
+          "contains": "postgres"
+        }
+      ]
+    }
+  },
+  {
+    "data": {
+      "prompt": "On Monday we shortlisted 5 CRM tools for a 20-person sales team. Has any of them changed pricing or shipped something big since?"
+    },
+    "target": {
+      "category": "golden",
+      "expectedTools": [
+        "recall_history"
+      ],
+      "args": [
+        {
+          "tool": "recall_history",
+          "arg": "from",
+          "equals": "2026-11-09"
+        }
+      ]
+    }
+  },
+  {
+    "data": {
+      "prompt": "Is the answer you gave me earlier about Neon pricing still correct?"
+    },
+    "target": {
+      "category": "secondary",
+      "expectedTools": [
+        "recall_history",
+        "web_search"
+      ]
+    }
+  },
+  {
+    "data": {
+      "prompt": "What did we talk about last week, and is any of it out of date now?"
+    },
+    "target": {
+      "category": "secondary",
+      "expectedTools": [
+        "recall_history"
+      ]
+    }
+  },
+  {
+    "data": {
+      "prompt": "Remind me what we decided about the CRM."
+    },
+    "target": {
+      "category": "secondary",
+      "expectedTools": [
+        "recall_history"
+      ]
+    }
+  },
+  {
+    "data": {
+      "prompt": "Hi"
+    },
+    "target": {
+      "category": "negative",
+      "forbiddenTools": [
+        "web_search",
+        "recall_history"
+      ]
+    }
+  },
+  {
+    "data": {
+      "prompt": "Thanks, that helps!"
+    },
+    "target": {
+      "category": "negative",
+      "forbiddenTools": [
+        "web_search",
+        "recall_history"
+      ]
+    }
+  },
+  {
+    "data": {
+      "prompt": "What is 17 * 23?"
+    },
+    "target": {
+      "category": "negative",
+      "forbiddenTools": [
+        "web_search",
+        "recall_history"
+      ]
+    }
+  },
+  {
+    "data": {
+      "prompt": "Rewrite this sentence to be more formal: 'hey, can u send the report asap'"
+    },
+    "target": {
+      "category": "negative",
+      "forbiddenTools": [
+        "web_search",
+        "recall_history"
+      ]
+    }
+  },
+  {
+    "data": {
+      "prompt": "Explain what a B-tree index is."
+    },
+    "target": {
+      "category": "negative",
+      "forbiddenTools": [
+        "recall_history"
+      ]
+    }
+  }
+]

@@ -1,0 +1,439 @@
+[
+  {
+    "data": {
+      "name": "empty memory (brief Q2 on a fresh instance)",
+      "prompts": [
+        "What did I ask you on 3 November? Is your answer still correct today?"
+      ]
+    },
+    "target": {
+      "expectedToolOrder": [
+        "recall_history"
+      ],
+      "forbiddenTools": [
+        "web_search"
+      ],
+      "args": [
+        {
+          "tool": "recall_history",
+          "arg": "from",
+          "equals": "2026-11-03"
+        },
+        {
+          "tool": "recall_history",
+          "arg": "to",
+          "equals": "2026-11-03"
+        }
+      ],
+      "mustMention": [
+        "no (record|conversation|history|messages)|don.t have|do not have|didn.t find|did not find|nothing (on|from)|not find"
+      ],
+      "rubric": "Says clearly that there is no record of any conversation on 3 November. Does not invent a question or an answer, and does not claim anything is still correct or incorrect."
+    }
+  },
+  {
+    "data": {
+      "name": "price changed since my question (brief Q2)",
+      "seed": [
+        {
+          "conversation": "Supabase pricing",
+          "at": "2026-11-03 14:05",
+          "role": "user",
+          "text": "What does Supabase Pro cost per month?"
+        },
+        {
+          "conversation": "Supabase pricing",
+          "at": "2026-11-03 14:06",
+          "role": "assistant",
+          "text": "Supabase Pro costs $25 per month per organization and includes $10 of compute credits. [Supabase Pricing](https://supabase.com/pricing)"
+        }
+      ],
+      "prompts": [
+        "What did I ask you on 3 November? Is your answer still correct today?"
+      ],
+      "pages": [
+        {
+          "match": [
+            "supabase"
+          ],
+          "url": "https://supabase.com/pricing",
+          "title": "Pricing & Fees | Supabase",
+          "text": "Pro plan: $29 per month per organization. Includes $10 in compute credits. 8 GB database included."
+        },
+        {
+          "match": [
+            "supabase"
+          ],
+          "url": "https://supabase.com/blog/pro-plan-pricing-update",
+          "title": "An update to Pro plan pricing",
+          "publishedDate": "2026-11-06",
+          "text": "From 6 November 2026 the Supabase Pro plan is $29 per month, up from $25. Compute credits stay at $10."
+        }
+      ]
+    },
+    "target": {
+      "expectedToolOrder": [
+        "recall_history",
+        "web_search"
+      ],
+      "mustMention": [
+        "\\$25",
+        "\\$29"
+      ],
+      "mustCite": [
+        "supabase.com"
+      ],
+      "rubric": "States that on 3 November the user asked what Supabase Pro costs and was told $25 per month. States that this is no longer correct: Pro is now $29 per month, changed on 6 November 2026. Cites supabase.com."
+    }
+  },
+  {
+    "data": {
+      "name": "nothing changed, ambiguous 'last Tuesday' (brief Q3)",
+      "seed": [
+        {
+          "conversation": "Postgres hosting",
+          "at": "2026-11-03 10:30",
+          "role": "user",
+          "text": "Which is cheaper for Postgres hosting, Neon or Supabase?"
+        },
+        {
+          "conversation": "Postgres hosting",
+          "at": "2026-11-03 10:31",
+          "role": "assistant",
+          "text": "Neon Launch is usage-based at $0.106 per compute-hour with no monthly minimum. Supabase Pro is $25 per month. For a small always-on database Supabase is simpler to budget; for spiky workloads Neon is cheaper. [Neon pricing](https://neon.com/pricing) [Supabase pricing](https://supabase.com/pricing)"
+        }
+      ],
+      "prompts": [
+        "Last Tuesday I asked you about Postgres hosting. Has any pricing changed since then?"
+      ],
+      "pages": [
+        {
+          "match": [
+            "neon"
+          ],
+          "url": "https://neon.com/pricing",
+          "title": "Neon Pricing",
+          "text": "Launch plan: $0.106 per CU-hour, pay for what you use, no monthly minimum. Storage $0.35 per GB-month."
+        },
+        {
+          "match": [
+            "supabase"
+          ],
+          "url": "https://supabase.com/pricing",
+          "title": "Pricing & Fees | Supabase",
+          "text": "Pro plan: $25 per month per organization. Includes $10 in compute credits."
+        }
+      ]
+    },
+    "target": {
+      "expectedToolOrder": [
+        "recall_history",
+        "web_search"
+      ],
+      "mustMention": [
+        "0\\.106",
+        "\\$25"
+      ],
+      "mustCite": [
+        "neon.com",
+        "supabase.com"
+      ],
+      "rubric": "Finds the conversation from Tuesday 3 November comparing Neon and Supabase. States that neither price has changed: Neon Launch is still $0.106 per compute-hour and Supabase Pro is still $25 per month. Does not invent a change."
+    }
+  },
+  {
+    "data": {
+      "name": "5 CRM tools since Monday (brief Q1)",
+      "seed": [
+        {
+          "conversation": "CRM shortlist",
+          "at": "2026-11-09 11:00",
+          "role": "user",
+          "text": "Shortlist 5 CRM tools for a 20-person sales team, with per-seat pricing."
+        },
+        {
+          "conversation": "CRM shortlist",
+          "at": "2026-11-09 11:01",
+          "role": "assistant",
+          "text": "Shortlist for a 20-person sales team:\n1. HubSpot Sales Hub Starter: $20 per seat/month\n2. Pipedrive Advanced: $24 per seat/month\n3. Salesforce Starter Suite: $25 per seat/month\n4. Close Growth: $49 per seat/month\n5. Attio Plus: $34 per seat/month"
+        }
+      ],
+      "prompts": [
+        "On Monday we shortlisted 5 CRM tools for a 20-person sales team. Has any of them changed pricing or shipped something big since?"
+      ],
+      "pages": [
+        {
+          "match": [
+            "hubspot"
+          ],
+          "url": "https://www.hubspot.com/pricing/sales",
+          "title": "Sales Hub Pricing | HubSpot",
+          "text": "Sales Hub Starter: $20 per seat per month."
+        },
+        {
+          "match": [
+            "hubspot"
+          ],
+          "url": "https://www.hubspot.com/company-news/breeze-assistant-sales-hub",
+          "title": "HubSpot launches Breeze Assistant for Sales Hub",
+          "publishedDate": "2026-11-10",
+          "text": "10 November 2026: HubSpot today launched Breeze Assistant on every Sales Hub tier, including Starter. It drafts follow-ups and summarizes deals."
+        },
+        {
+          "match": [
+            "pipedrive"
+          ],
+          "url": "https://www.pipedrive.com/en/pricing",
+          "title": "Pipedrive Pricing",
+          "text": "Advanced: $29 per seat per month."
+        },
+        {
+          "match": [
+            "pipedrive"
+          ],
+          "url": "https://www.pipedrive.com/en/blog/pricing-update-november-2026",
+          "title": "Pricing update, November 2026",
+          "publishedDate": "2026-11-10",
+          "text": "From 10 November 2026 the Advanced plan moves from $24 to $29 per seat per month."
+        },
+        {
+          "match": [
+            "salesforce"
+          ],
+          "url": "https://www.salesforce.com/small-business/pricing/",
+          "title": "Salesforce Starter Suite Pricing",
+          "text": "Starter Suite: $25 per user per month."
+        },
+        {
+          "match": [
+            "close"
+          ],
+          "url": "https://www.close.com/pricing",
+          "title": "Close CRM Pricing",
+          "text": "Growth: $49 per seat per month."
+        },
+        {
+          "match": [
+            "attio"
+          ],
+          "url": "https://attio.com/pricing",
+          "title": "Attio Pricing",
+          "text": "Plus: $34 per seat per month."
+        }
+      ]
+    },
+    "target": {
+      "expectedToolOrder": [
+        "recall_history",
+        "web_search"
+      ],
+      "minCalls": {
+        "tool": "web_search",
+        "count": 5
+      },
+      "mustMention": [
+        "pipedrive",
+        "\\$29",
+        "breeze",
+        "salesforce",
+        "close",
+        "attio"
+      ],
+      "mustCite": [
+        "pipedrive.com",
+        "hubspot.com"
+      ],
+      "rubric": "Recalls the five tools shortlisted on Monday 9 November (HubSpot, Pipedrive, Salesforce, Close, Attio). Reports that Pipedrive Advanced rose from $24 to $29 per seat on 10 November, and that HubSpot launched Breeze Assistant on 10 November. States that Salesforce, Close and Attio pricing is unchanged. Covers all five tools."
+    }
+  },
+  {
+    "data": {
+      "name": "search fails",
+      "prompts": [
+        "What does Vercel Pro cost right now?"
+      ],
+      "searchFails": true
+    },
+    "target": {
+      "expectedToolOrder": [
+        "web_search"
+      ],
+      "mustMention": [
+        "couldn.t|could not|can.t|cannot|unable|fail|unavailable|error|wasn.t able|was not able"
+      ],
+      "mustNotMention": [
+        "\\$\\s?\\d"
+      ],
+      "rubric": "Says the search failed and the current price could not be verified. Does not state a price from memory as if it were current."
+    }
+  },
+  {
+    "data": {
+      "name": "number only on a third-party site",
+      "prompts": [
+        "What does the Team plan of Nimbus DB cost?"
+      ],
+      "pages": [
+        {
+          "match": [
+            "nimbus"
+          ],
+          "url": "https://nimbusdb.com/pricing",
+          "title": "Pricing - Nimbus DB",
+          "text": "Nimbus DB pricing. Free: $0, up to 1 GB storage. Pro: $19 per month, 50 GB storage. Team: custom pricing, contact sales."
+        },
+        {
+          "match": [
+            "nimbus"
+          ],
+          "url": "https://pricewatch.dev/nimbus-db",
+          "title": "Nimbus DB pricing (2026) - PriceWatch",
+          "publishedDate": "2026-10-20",
+          "text": "Nimbus DB Team plan costs $49 per seat per month, according to user reports collected by PriceWatch."
+        }
+      ]
+    },
+    "target": {
+      "expectedToolOrder": [
+        "web_search"
+      ],
+      "mustMention": [
+        "contact sales|custom"
+      ],
+      "mustCite": [
+        "nimbusdb.com"
+      ],
+      "attribution": [
+        {
+          "value": "\\$49",
+          "domain": "pricewatch.dev"
+        }
+      ],
+      "rubric": "Says the official Nimbus DB pricing page lists the Team plan as custom pricing (contact sales). May mention the $49 per seat figure, but only attributed to PriceWatch and flagged as unofficial or unverified. Must not present $49 as the official price or link it to nimbusdb.com."
+    }
+  },
+  {
+    "data": {
+      "name": "undated page: no invented date",
+      "prompts": [
+        "When did Nimbus DB last change its prices?"
+      ],
+      "pages": [
+        {
+          "match": [
+            "nimbus"
+          ],
+          "url": "https://nimbusdb.com/pricing",
+          "title": "Pricing - Nimbus DB",
+          "text": "Nimbus DB pricing. Free: $0, up to 1 GB storage. Pro: $19 per month, 50 GB storage. Team: custom pricing, contact sales."
+        }
+      ]
+    },
+    "target": {
+      "expectedToolOrder": [
+        "web_search"
+      ],
+      "rubric": "Says it could not find when prices last changed: the pricing page carries no date. May report the current prices. Must not state or guess a date of change."
+    }
+  },
+  {
+    "data": {
+      "name": "greeting",
+      "prompts": [
+        "Hi"
+      ]
+    },
+    "target": {
+      "forbiddenTools": [
+        "web_search",
+        "recall_history"
+      ],
+      "rubric": "A short friendly greeting that offers help. No search, no invented context."
+    }
+  },
+  {
+    "data": {
+      "name": "official page over aggregators (regression)",
+      "prompts": [
+        "telling pricing of claude models"
+      ],
+      "pages": [
+        {
+          "match": [
+            "claude",
+            "anthropic"
+          ],
+          "url": "https://claude.com/pricing",
+          "title": "Plans & pricing | Claude",
+          "text": "Plans: Pro $20 per month. Max $100 per month. Team $25 per seat per month. API pricing per million tokens (input / output): Opus 5.5 $4 / $20. Sonnet 5.5 $2 / $10. Haiku 5.5 $0.10 / $0.50."
+        },
+        {
+          "match": [
+            "claude",
+            "anthropic"
+          ],
+          "url": "https://13k.eu/en/apis/claude-api-pricing/",
+          "title": "Claude API pricing guide",
+          "publishedDate": "2026-10-09",
+          "text": "Claude API pricing: Sonnet 5.5 costs $2 input and $10 output per million tokens. Opus 5.5 costs $4 and $20."
+        },
+        {
+          "match": [
+            "claude",
+            "anthropic"
+          ],
+          "url": "https://aipresso.com/blog/claude-api-pricing",
+          "title": "Claude pricing explained",
+          "publishedDate": "2026-11-10",
+          "text": "Claude Pro is $20 a month. Here is our guide to every Claude plan."
+        }
+      ]
+    },
+    "target": {
+      "expectedToolOrder": [
+        "web_search"
+      ],
+      "mustMention": [
+        "\\$20",
+        "\\$100",
+        "\\$4",
+        "\\$0\\.10",
+        "\\|"
+      ],
+      "mustCite": [
+        "claude.com"
+      ],
+      "mustNotCite": [
+        "13k.eu",
+        "aipresso.com"
+      ],
+      "rubric": "Gives Claude pricing from the official claude.com page, covering BOTH subscription plans (Pro $20, Max $100, Team $25 per seat) and API prices per million tokens (Opus $4/$20, Sonnet $2/$10, Haiku $0.10/$0.50). Uses a table. Cites claude.com, not aggregator blogs. Does not end by asking the user which they want."
+    }
+  },
+  {
+    "data": {
+      "name": "follow-up keeps context",
+      "prompts": [
+        "What does Nimbus DB Pro cost?",
+        "and the free plan?"
+      ],
+      "pages": [
+        {
+          "match": [
+            "nimbus"
+          ],
+          "url": "https://nimbusdb.com/pricing",
+          "title": "Pricing - Nimbus DB",
+          "text": "Nimbus DB pricing. Free: $0, up to 1 GB storage. Pro: $19 per month, 50 GB storage. Team: custom pricing, contact sales."
+        }
+      ]
+    },
+    "target": {
+      "mustMention": [
+        "\\$0|free",
+        "1 ?GB"
+      ],
+      "rubric": "Understands that the follow-up refers to Nimbus DB. Says the Free plan costs $0 and includes up to 1 GB of storage."
+    }
+  }
+]
