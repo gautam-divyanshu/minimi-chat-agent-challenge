@@ -24,8 +24,9 @@
 | UI | React + Tailwind + shadcn/ui; react-markdown with memoized finished blocks |
 | DB | `node:sqlite` + Drizzle ORM + FTS5 for keyword recall |
 | Dates | chrono-node in the harness, using the browser's IANA timezone |
-| Evals | Vitest unit tests + multi-turn scenario suite with LLM judge (`npm run eval`) |
-| `.env.example` | `OPENAI_API_KEY`, `EXA_API_KEY`, `OPENAI_MODEL` |
+| Tests | Vitest unit tests (`npm test`, offline) + live tests (`npm run test:live`) |
+| Evals + tracing | Laminar (`@lmnr-ai/lmnr`), as in the agents-v2 course: `evaluate()` datasets with code scorers + LLM judge (`npm run eval`); traces per chat turn. Optional at runtime: no key, no tracing |
+| `.env.example` | `OPENAI_API_KEY`, `EXA_API_KEY`, `OPENAI_MODEL`, `LMNR_PROJECT_API_KEY` (optional for chatting) |
 
 ## Architecture
 ```

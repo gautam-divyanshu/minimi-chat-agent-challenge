@@ -10,6 +10,7 @@ import type { AgentTool } from './tool'
 import { createRecallHistory } from './tools/recall-history'
 import { createWebSearch } from './tools/web-search'
 import { mentionsTimeWindow } from './dates'
+import { getTracing, type Tracing } from './tracing'
 
 /**
  * One chat turn, end to end. Framework-free: the HTTP route, evals and a CLI
@@ -30,6 +31,7 @@ export type TurnInput = {
   model?: LanguageModel
   tools?: (ctx: { timezone: string; beforeMs: number }) => AgentTool[]
   getDb?: typeof defaultGetDb
+  tracing?: Tracing
 }
 
 /** How many past messages of this conversation the model sees verbatim. */
@@ -83,7 +85,9 @@ export async function runTurn(input: TurnInput): Promise<{ messageId: number }> 
   // 4. The loop. Text and tool events stream out and are saved as they land.
   let answer = ''
   try {
-    const result = await runAgentLoop({
+    const tracing = input.tracing ?? (await getTracing())
+    const loop = () => runAgentLoop({
+      tracing,
       model: input.model ?? getModel(),
       providerOptions: MODEL_SETTINGS,
       system: buildSystemPrompt({ now: new Date(now), timezone }),
@@ -108,6 +112,8 @@ export async function runTurn(input: TurnInput): Promise<{ messageId: number }> 
           .catch((err) => console.error('tool_events insert failed', err))
       },
     })
+    // One trace per turn; conversations group as sessions in Laminar.
+    const result = await tracing.span({ name: 'chat.turn', sessionId: conversationId, input: { text, timezone } }, loop)
     answer = result.text
   } catch (err) {
     const message = err instanceof Error ? err.message : String(err)

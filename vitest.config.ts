@@ -11,5 +11,7 @@ export default defineConfig({
     include: ['src/**/*.test.ts'],
     exclude: live ? [] : ['src/**/*.live.test.ts'],
     testTimeout: live ? 60_000 : 5_000,
+    // Offline runs must not send traces: an empty value wins over .env.
+    env: live ? {} : { LMNR_PROJECT_API_KEY: '' },
   },
 })

@@ -1,6 +1,7 @@
 import { streamText, tool as sdkTool, type LanguageModel, type ModelMessage, type ToolSet } from 'ai'
 import type { AgentEvent } from '#/shared/events'
 import type { AgentTool } from './tool'
+import { noTracing, type Tracing } from './tracing'
 
 /**
  * The agent loop. The AI SDK is used for one thing: a single streamed model
@@ -43,6 +44,8 @@ export type LoopOptions = {
   onEvent: (event: AgentEvent) => void
   /** Called as each tool finishes, with full input/output (for persistence). */
   onToolRun?: (run: ToolRun) => void
+  /** Laminar tracing; defaults to off. */
+  tracing?: Tracing
   signal?: AbortSignal
 }
 
@@ -58,6 +61,7 @@ export type LoopResult = {
 export async function runAgentLoop(opts: LoopOptions): Promise<LoopResult> {
   const { model, system, tools, onEvent, signal } = opts
   const maxSteps = opts.maxSteps ?? 6
+  const tracing = opts.tracing ?? noTracing
   const byName = new Map(tools.map((t) => [t.name, t]))
   const sdkTools: ToolSet = Object.fromEntries(
     tools.map((t) => [t.name, sdkTool({ description: t.description, inputSchema: t.inputSchema })]),
@@ -78,6 +82,7 @@ export async function runAgentLoop(opts: LoopOptions): Promise<LoopResult> {
       // On the final step the model must answer with what it has.
       toolChoice: lastStep ? 'none' : 'auto',
       providerOptions: opts.providerOptions,
+      telemetry: tracing.telemetry,
       abortSignal: signal,
       maxRetries: 1,
     })
@@ -125,7 +130,11 @@ export async function runAgentLoop(opts: LoopOptions): Promise<LoopResult> {
     // Independent tool calls run in parallel (e.g. 5 CRM tools → 5 searches at once).
     const runs = await Promise.all(
       calls.map(async (c) => {
-        const run = await runTool(c, byName.get(c.tool), onEvent, signal)
+        const run = await tracing.span({ name: c.tool, spanType: 'TOOL', input: c.input }, async () => {
+          const r = await runTool(c, byName.get(c.tool), onEvent, signal)
+          // A failed tool is a result, not an exception, so surface it on the span.
+          return r.error ? { ...r, output: { error: r.error } } : r
+        })
         opts.onToolRun?.(run)
         return run
       }),

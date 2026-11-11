@@ -1,9 +1,13 @@
-import { expect, it } from 'vitest'
+import { afterAll, expect, it } from 'vitest'
 import '#/server/env'
 import { createTestDb } from '#/server/db/client'
 import { toolEvents } from '#/server/db/schema'
 import type { AgentEvent } from '#/shared/events'
 import { runTurn } from './harness'
+import { getTracing } from './tracing'
+
+// Short-lived process: send the buffered spans before exiting.
+afterAll(async () => (await getTracing()).flush())
 
 // Regression: the model once added `since` on its own, the date filter hid the
 // undated official pricing pages, and the answer cited price aggregators.
