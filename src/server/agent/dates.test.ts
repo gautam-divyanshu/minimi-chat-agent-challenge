@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { endOfDayMs, formatLocal, startOfDayMs, tzOffsetMs } from './dates'
+import { endOfDayMs, formatLocal, mentionsTimeWindow, startOfDayMs, tzOffsetMs } from './dates'
 
 describe('timezone helpers', () => {
   it('computes offsets, including half-hour zones', () => {
@@ -24,4 +24,21 @@ describe('timezone helpers', () => {
   it('formats in the user timezone', () => {
     expect(formatLocal(Date.UTC(2026, 10, 3, 8, 35), 'Asia/Kolkata')).toBe('Tue, 3 Nov 2026, 14:05')
   })
+})
+
+describe('mentionsTimeWindow', () => {
+  it.each([
+    'Has HubSpot shipped anything big since Monday?',
+    'What did I ask you on 3 November? Is your answer still correct today?',
+    'Last Tuesday I asked you about Postgres hosting. Has any pricing changed since then?',
+    'any changes in the last 3 days?',
+    'what changed in 2026',
+  ])('yes: %s', (t) => expect(mentionsTimeWindow(t)).toBe(true))
+
+  it.each([
+    'telling pricing of claude models',
+    'Compare the cheapest paid plans of Neon, Supabase and PlanetScale right now.',
+    'what is the latest iPhone price today',
+    'Hi',
+  ])('no: %s', (t) => expect(mentionsTimeWindow(t)).toBe(false))
 })

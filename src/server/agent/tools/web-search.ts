@@ -9,9 +9,12 @@ import { defineTool } from '../tool'
  * (query-anchored excerpts, far fewer tokens than full page text). No
  * numResults/category/domain filters: Exa's defaults beat guesses.
  *
- * Date filters are hard filters that drop undated pages (pricing pages often
- * have no date), so they are only for a window the user stated ("since
- * Monday"), and an empty filtered search is retried without them.
+ * Date filters are hard filters that drop every page without a publish
+ * date, and official pricing pages have none. A filtered search alone once
+ * returned five blog posts instead of the vendor's pricing page. So a dated
+ * search never replaces the normal one: both run in parallel and are merged,
+ * with each result marked as inside the window or not. And the harness can
+ * switch date filters off entirely when the user gave no time window.
  */
 
 type ExaClient = Pick<Exa, 'search'>
@@ -23,8 +26,8 @@ const inputSchema = z.object({
   objective: z.string().min(1).describe(SEARCH_OBJECTIVE_TOOL_DESCRIPTION),
   since: isoDate
     .optional()
-    .describe('Only pages published on/after this date. Use ONLY for a window the user stated ("since Monday"); never for "latest".'),
-  until: isoDate.optional().describe('Only pages published on/before this date. Same rule as `since`.'),
+    .describe('Start of a time window the user stated ("since Monday"). Adds pages published on/after this date, marked inWindow. Omit unless the user gave a window; never for "latest".'),
+  until: isoDate.optional().describe('End of a user-stated window. Same rule as `since`.'),
 })
 
 export type WebSearchInput = z.infer<typeof inputSchema>
@@ -34,13 +37,15 @@ export type WebSearchResult = {
   url: string
   publishedDate?: string
   author?: string
+  /** Only on dated searches: was this page published inside since/until? */
+  inWindow?: boolean
   highlights: string[]
 }
 
 export type WebSearchOutput = {
   /** When the search ran (UTC ISO). The model cites this as "checked on". */
   searchedAt: string
-  /** Set when a date-filtered search found nothing and was retried unfiltered. */
+  /** How to read the results of a dated search, or why dates were ignored. */
   note?: string
   results: WebSearchResult[]
 }
@@ -50,6 +55,8 @@ export type WebSearchOptions = {
   numResults?: number
   /** Per-result highlight budget, in characters. */
   maxCharacters?: number
+  /** False when the user gave no time window: since/until are then ignored. */
+  allowDates?: boolean
 }
 
 export function createWebSearch(getClient: () => ExaClient = defaultClient, opts: WebSearchOptions = {}) {
@@ -70,26 +77,44 @@ export function createWebSearch(getClient: () => ExaClient = defaultClient, opts
           ...(dated && until ? { endPublishedDate: `${until}T23:59:59.999Z` } : {}),
           signal,
         })
+      const toResult = (r: Awaited<ReturnType<typeof search>>['results'][number]): WebSearchResult => ({
+        title: r.title ?? r.url,
+        url: r.url,
+        publishedDate: r.publishedDate?.slice(0, 10),
+        author: r.author || undefined,
+        highlights: r.highlights ?? [],
+      })
 
       const searchedAt = new Date().toISOString()
-      const dated = Boolean(since || until)
-      let res = await search(dated)
-      let note: string | undefined
-      if (dated && res.results.length === 0) {
-        res = await search(false)
-        note = `No pages with a publish date in the requested range (${since ?? '…'} to ${until ?? '…'}). These results are unfiltered: check each page's date before treating it as a change in that window; undated pages (e.g. pricing pages) show current state, not when it changed.`
+      const wantsDates = Boolean(since || until)
+      if (!wantsDates || opts.allowDates === false) {
+        const res = await search(false)
+        return {
+          searchedAt,
+          note: wantsDates ? 'Date filter ignored: the user gave no time window. These are current results.' : undefined,
+          results: res.results.map(toResult),
+        }
       }
 
+      // Current state and what was published in the window, side by side.
+      const [current, windowed] = await Promise.allSettled([search(false), search(true)])
+      if (current.status === 'rejected') throw current.reason
+      const range = `${since ?? 'any time'} to ${until ?? 'now'}`
+      const inRange = (d?: string) => Boolean(d && (!since || d >= since) && (!until || d <= until))
+      const results = current.value.results.map(toResult).map((r) => ({ ...r, inWindow: inRange(r.publishedDate) }))
+      const seen = new Set(results.map((r) => r.url))
+      const fresh = windowed.status === 'fulfilled' ? windowed.value.results.map(toResult).filter((r) => !seen.has(r.url)) : []
+      results.push(...fresh.map((r) => ({ ...r, inWindow: true })))
+
+      const found = results.filter((r) => r.inWindow).length
       return {
         searchedAt,
-        note,
-        results: res.results.map((r) => ({
-          title: r.title ?? r.url,
-          url: r.url,
-          publishedDate: r.publishedDate?.slice(0, 10),
-          author: r.author || undefined,
-          highlights: r.highlights ?? [],
-        })),
+        note:
+          (found
+            ? `${found} result(s) marked inWindow were published ${range}.`
+            : `No pages were published ${range}; say so rather than implying a change.`) +
+          ' The others show the current state: undated pages (pricing pages, docs) are current but do not say when they changed.',
+        results,
       }
     },
     sources: (out) => out.results.map((r) => ({ title: r.title, url: r.url, publishedAt: r.publishedDate })),

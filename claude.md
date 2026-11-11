@@ -59,7 +59,8 @@ SQLite: conversations · messages · tool_events · claims · messages_fts
 - Results: title, url, published date, highlights. numResults 5 (benchmarked: halves model input, same correctness)
 - Speed settings in `model.ts` MODEL_SETTINGS: reasoningEffort low, textVerbosity low. Benchmark (`bench.live.test.ts`, 3-product question): 22.8s→8.5s first text, 27.3s→13.7s total
 - Errors returned as tool results (`{ error: "timeout" }`), never thrown
-- If date filters return nothing (pricing pages often lack dates), retry without dates and say so
+- A dated search never replaces the normal one: unfiltered + date-filtered run in parallel, merged, each result marked `inWindow`. Reason: date filters drop undated pages, and official pricing pages are undated (a model-added `since` once returned only aggregators)
+- Harness sets `allowDates: false` unless the user named a time window in the last 3 user messages (`mentionsTimeWindow` in `dates.ts`); since/until are then ignored
 
 `recall_history({ from?, to?, query? })`
 - Past messages by date range and/or FTS5 keywords, with timestamps + their stored claims

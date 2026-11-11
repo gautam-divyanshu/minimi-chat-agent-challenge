@@ -8,7 +8,8 @@ import { getModel, MODEL_SETTINGS } from './model'
 import { buildSystemPrompt } from './prompt'
 import type { AgentTool } from './tool'
 import { createRecallHistory } from './tools/recall-history'
-import { webSearch } from './tools/web-search'
+import { createWebSearch } from './tools/web-search'
+import { mentionsTimeWindow } from './dates'
 
 /**
  * One chat turn, end to end. Framework-free: the HTTP route, evals and a CLI
@@ -66,9 +67,18 @@ export async function runTurn(input: TurnInput): Promise<{ messageId: number }> 
     .slice(-HISTORY_MESSAGES)
     .map((m) => ({ role: m.role, content: m.text }))
 
+  // Date filters are only available when the user named a time window, in
+  // this message or the last few (so "and what about Pipedrive?" keeps one).
+  const recentUserText = history.filter((m) => m.role === 'user').slice(-3).map((m) => m.text)
+  const allowDates = recentUserText.some(mentionsTimeWindow)
+
   const tools = input.tools
     ? input.tools({ timezone, beforeMs: now })
-    : [webSearch, createRecallHistory({ timezone, beforeMs: now })]
+    : [
+        // 5 results, not Exa's default 10: see the note in web-search.ts.
+        createWebSearch(undefined, { numResults: 5, allowDates }),
+        createRecallHistory({ timezone, beforeMs: now }),
+      ]
 
   // 4. The loop. Text and tool events stream out and are saved as they land.
   let answer = ''

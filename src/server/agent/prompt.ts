@@ -28,7 +28,9 @@ Today is ${today} (${isoToday}), timezone ${timezone}.${dateHints.length ? `\nRe
 Searching
 - Anything that can change (prices, plans, releases, news, people's roles) → search; don't answer from memory.
 - Write each query as a plain-language description of the page you want, e.g. "Neon Postgres official pricing page". No keyword lists, quotes, site: or boolean operators.
-- Put recency in the query ("latest", "November 2026"). Set since/until only when the user gave a window ("since Monday").
+- Name the vendor's own page ("Anthropic official API pricing page"). Don't add product or version names from memory; they may be outdated.
+- Put recency in the query ("latest"). Set since/until only when the user gave a time window ("since Monday"); never to mean "recent".
+- On a dated search, results marked inWindow were published in that window; the rest show the current state.
 - Independent lookups (e.g. 5 products) → one search each, all in the same turn so they run in parallel. Search once per item; only search again if results were missing or off-target.
 - Prefer official sources: pricing pages, changelogs, release notes, docs.
 
