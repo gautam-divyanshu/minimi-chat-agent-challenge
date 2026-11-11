@@ -45,7 +45,14 @@ export type WebSearchOutput = {
   results: WebSearchResult[]
 }
 
-export function createWebSearch(getClient: () => ExaClient = defaultClient) {
+export type WebSearchOptions = {
+  /** Results per search; Exa's default is 10. */
+  numResults?: number
+  /** Per-result highlight budget, in characters. */
+  maxCharacters?: number
+}
+
+export function createWebSearch(getClient: () => ExaClient = defaultClient, opts: WebSearchOptions = {}) {
   return defineTool({
     name: 'web_search',
     description: `${DEFAULT_WEB_SEARCH_TOOL_DESCRIPTION} Searches the live web; use it for anything current (prices, releases, news, changelogs). Independent lookups should be separate calls in the same turn so they run in parallel.`,
@@ -57,7 +64,8 @@ export function createWebSearch(getClient: () => ExaClient = defaultClient) {
         exa.search(query, {
           type: 'auto',
           objective,
-          contents: { highlights: true },
+          ...(opts.numResults ? { numResults: opts.numResults } : {}),
+          contents: { highlights: opts.maxCharacters ? { maxCharacters: opts.maxCharacters } : true },
           ...(dated && since ? { startPublishedDate: `${since}T00:00:00.000Z` } : {}),
           ...(dated && until ? { endPublishedDate: `${until}T23:59:59.999Z` } : {}),
           signal,
@@ -94,4 +102,7 @@ function defaultClient(): ExaClient {
   return client
 }
 
-export const webSearch = createWebSearch()
+// 5 results, not Exa's default 10: halves the excerpts the model must read
+// (~12k vs ~23k tokens for 3 searches) with no loss of correctness in
+// bench.live.test.ts. An intentional product decision, per Exa's guidance.
+export const webSearch = createWebSearch(undefined, { numResults: 5 })

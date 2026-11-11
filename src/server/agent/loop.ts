@@ -21,8 +21,20 @@ export type ToolRun = {
   error?: string
 }
 
+export type StepStat = {
+  /** Wall time of the model call, and time until its first streamed part. */
+  ms: number
+  firstPartMs: number
+  inputTokens?: number
+  outputTokens?: number
+  reasoningTokens?: number
+  toolCalls: number
+}
+
 export type LoopOptions = {
   model: LanguageModel
+  /** Provider settings, e.g. { openai: { reasoningEffort: 'low' } }. */
+  providerOptions?: Record<string, Record<string, any>>
   system: string
   messages: ModelMessage[]
   tools: AgentTool[]
@@ -36,6 +48,7 @@ export type LoopResult = {
   text: string
   toolRuns: ToolRun[]
   steps: number
+  stepStats: StepStat[]
   /** Conversation including this turn's assistant + tool messages. */
   messages: ModelMessage[]
 }
@@ -50,6 +63,7 @@ export async function runAgentLoop(opts: LoopOptions): Promise<LoopResult> {
 
   const messages = [...opts.messages]
   const toolRuns: ToolRun[] = []
+  const stepStats: StepStat[] = []
   let text = ''
 
   for (let step = 0; step < maxSteps; step++) {
@@ -61,13 +75,17 @@ export async function runAgentLoop(opts: LoopOptions): Promise<LoopResult> {
       tools: sdkTools,
       // On the final step the model must answer with what it has.
       toolChoice: lastStep ? 'none' : 'auto',
+      providerOptions: opts.providerOptions,
       abortSignal: signal,
       maxRetries: 1,
     })
+    const stepStart = Date.now()
+    const stat: StepStat = { ms: 0, firstPartMs: 0, toolCalls: 0 }
 
     const calls: { callId: string; tool: string; input: unknown; invalid?: string }[] = []
     let stepText = ''
     for await (const part of result.stream) {
+      if (!stat.firstPartMs && (part.type === 'text-delta' || part.type === 'tool-call')) stat.firstPartMs = Date.now() - stepStart
       switch (part.type) {
         case 'text-delta': {
           // Separate this step's text from earlier steps' ("Let me check…").
@@ -85,14 +103,22 @@ export async function runAgentLoop(opts: LoopOptions): Promise<LoopResult> {
             invalid: part.invalid ? errorMessage(part.error) : undefined,
           })
           break
+        case 'finish-step':
+          stat.inputTokens = part.usage.inputTokens
+          stat.outputTokens = part.usage.outputTokens
+          stat.reasoningTokens = part.usage.outputTokenDetails?.reasoningTokens
+          break
         case 'error':
           throw part.error
       }
     }
+    stat.ms = Date.now() - stepStart
+    stat.toolCalls = calls.length
+    stepStats.push(stat)
 
     const responseMessages = await result.responseMessages
     messages.push(...responseMessages)
-    if (calls.length === 0) return { text, toolRuns, steps: step + 1, messages }
+    if (calls.length === 0) return { text, toolRuns, steps: step + 1, stepStats, messages }
 
     // Independent tool calls run in parallel (e.g. 5 CRM tools → 5 searches at once).
     const runs = await Promise.all(calls.map((c) => runTool(c, byName.get(c.tool), onEvent, signal)))
@@ -119,7 +145,7 @@ export async function runAgentLoop(opts: LoopOptions): Promise<LoopResult> {
   }
 
   // Unreachable: the last step has toolChoice 'none', so it returns above.
-  return { text, toolRuns, steps: maxSteps, messages }
+  return { text, toolRuns, steps: maxSteps, stepStats, messages }
 }
 
 async function runTool(
