@@ -14,4 +14,4 @@ todos.json
 data/
 *.db
 *.db-*
-harness-engineering
+harness-engineeringevals/results/

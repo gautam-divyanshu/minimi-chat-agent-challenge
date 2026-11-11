@@ -8,7 +8,7 @@ export default defineConfig({
   resolve: { tsconfigPaths: true },
   test: {
     environment: 'node',
-    include: ['src/**/*.test.ts'],
+    include: ['src/**/*.test.ts', 'evals/**/*.test.ts'],
     exclude: live ? [] : ['src/**/*.live.test.ts'],
     testTimeout: live ? 60_000 : 5_000,
     // Offline runs must not send traces: an empty value wins over .env.

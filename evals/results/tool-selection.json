@@ -1,0 +1,162 @@
+[
+  {
+    "name": "telling pricing of claude models",
+    "scores": {
+      "toolsSelected": 1,
+      "toolsAvoided": 1,
+      "selectionScore": 1,
+      "argsCorrect": 1,
+      "parallelCalls": 1
+    }
+  },
+  {
+    "name": "What does Supabase Pro cost right now?",
+    "scores": {
+      "toolsSelected": 1,
+      "toolsAvoided": 1,
+      "selectionScore": 1,
+      "argsCorrect": 1,
+      "parallelCalls": 1
+    }
+  },
+  {
+    "name": "What's the latest stable version of Node.js?",
+    "scores": {
+      "toolsSelected": 1,
+      "toolsAvoided": 1,
+      "selectionScore": 1,
+      "argsCorrect": 1,
+      "parallelCalls": 1
+    }
+  },
+  {
+    "name": "Has HubSpot shipped anything big since Monday?",
+    "scores": {
+      "toolsSelected": 1,
+      "toolsAvoided": 1,
+      "selectionScore": 1,
+      "argsCorrect": 0,
+      "parallelCalls": 1
+    }
+  },
+  {
+    "name": "Compare current per-seat pricing of HubSpot, Pipedrive, Salesforce, Close and Attio for a 20-person sales team.",
+    "scores": {
+      "toolsSelected": 1,
+      "toolsAvoided": 1,
+      "selectionScore": 1,
+      "argsCorrect": 1,
+      "parallelCalls": 1
+    }
+  },
+  {
+    "name": "On Monday we shortlisted 5 CRM tools for a 20-person sales team. Has any of them changed pricing or shipped something big since?",
+    "scores": {
+      "toolsSelected": 1,
+      "toolsAvoided": 1,
+      "selectionScore": 1,
+      "argsCorrect": 0,
+      "parallelCalls": 1
+    }
+  },
+  {
+    "name": "What did I ask you on 3 November?",
+    "scores": {
+      "toolsSelected": 1,
+      "toolsAvoided": 1,
+      "selectionScore": 1,
+      "argsCorrect": 1,
+      "parallelCalls": 1
+    }
+  },
+  {
+    "name": "Last Tuesday I asked you about Postgres hosting. Has any pricing changed since then?",
+    "scores": {
+      "toolsSelected": 1,
+      "toolsAvoided": 1,
+      "selectionScore": 1,
+      "argsCorrect": 0,
+      "parallelCalls": 1
+    }
+  },
+  {
+    "name": "Remind me what we decided about the CRM.",
+    "scores": {
+      "toolsSelected": 1,
+      "toolsAvoided": 1,
+      "selectionScore": 1,
+      "argsCorrect": 1,
+      "parallelCalls": 1
+    }
+  },
+  {
+    "name": "Hi",
+    "scores": {
+      "toolsSelected": 1,
+      "toolsAvoided": 1,
+      "selectionScore": 1,
+      "argsCorrect": 1,
+      "parallelCalls": 1
+    }
+  },
+  {
+    "name": "Is the answer you gave me earlier about Neon pricing still correct?",
+    "scores": {
+      "toolsSelected": 1,
+      "toolsAvoided": 1,
+      "selectionScore": 1,
+      "argsCorrect": 1,
+      "parallelCalls": 1
+    }
+  },
+  {
+    "name": "Thanks, that helps!",
+    "scores": {
+      "toolsSelected": 1,
+      "toolsAvoided": 1,
+      "selectionScore": 1,
+      "argsCorrect": 1,
+      "parallelCalls": 1
+    }
+  },
+  {
+    "name": "What did we talk about last week, and is any of it out of date now?",
+    "scores": {
+      "toolsSelected": 1,
+      "toolsAvoided": 1,
+      "selectionScore": 1,
+      "argsCorrect": 1,
+      "parallelCalls": 1
+    }
+  },
+  {
+    "name": "What is 17 * 23?",
+    "scores": {
+      "toolsSelected": 1,
+      "toolsAvoided": 1,
+      "selectionScore": 1,
+      "argsCorrect": 1,
+      "parallelCalls": 1
+    }
+  },
+  {
+    "name": "Rewrite this sentence to be more formal: 'hey, can u send the report asap'",
+    "scores": {
+      "toolsSelected": 1,
+      "toolsAvoided": 1,
+      "selectionScore": 1,
+      "argsCorrect": 1,
+      "parallelCalls": 1
+    }
+  },
+  {
+    "name": "Explain what a B-tree index is.",
+    "scores": {
+      "toolsSelected": 1,
+      "toolsAvoided": 1,
+      "selectionScore": 1,
+      "argsCorrect": 1,
+      "parallelCalls": 1
+    }
+  }
+]

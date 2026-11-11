@@ -1,0 +1,162 @@
+[
+  {
+    "name": "empty memory (brief Q2 on a fresh instance)",
+    "scores": {
+      "toolOrder": 1,
+      "toolsAvoided": 1,
+      "argsCorrect": 0.5,
+      "parallelCalls": 1,
+      "mentions": 1,
+      "citations": 1,
+      "attribution": 1,
+      "cleanOutput": 1,
+      "judge": 1,
+      "firstTextSeconds": 3.855,
+      "totalSeconds": 4.669
+    }
+  },
+  {
+    "name": "search fails",
+    "scores": {
+      "toolOrder": 1,
+      "toolsAvoided": 1,
+      "argsCorrect": 1,
+      "parallelCalls": 1,
+      "mentions": 0,
+      "citations": 1,
+      "attribution": 1,
+      "cleanOutput": 1,
+      "judge": 1,
+      "firstTextSeconds": 9.435,
+      "totalSeconds": 10.198
+    }
+  },
+  {
+    "name": "nothing changed, ambiguous 'last Tuesday' (brief Q3)",
+    "scores": {
+      "toolOrder": 1,
+      "toolsAvoided": 1,
+      "argsCorrect": 1,
+      "parallelCalls": 1,
+      "mentions": 1,
+      "citations": 1,
+      "attribution": 1,
+      "cleanOutput": 1,
+      "judge": 1,
+      "firstTextSeconds": 12.24,
+      "totalSeconds": 12.97
+    }
+  },
+  {
+    "name": "price changed since my question (brief Q2)",
+    "scores": {
+      "toolOrder": 1,
+      "toolsAvoided": 1,
+      "argsCorrect": 1,
+      "parallelCalls": 1,
+      "mentions": 1,
+      "citations": 1,
+      "attribution": 1,
+      "cleanOutput": 1,
+      "judge": 0.9,
+      "firstTextSeconds": 10.638,
+      "totalSeconds": 13.337
+    }
+  },
+  {
+    "name": "5 CRM tools since Monday (brief Q1)",
+    "scores": {
+      "toolOrder": 1,
+      "toolsAvoided": 1,
+      "argsCorrect": 1,
+      "parallelCalls": 1,
+      "mentions": 1,
+      "citations": 1,
+      "attribution": 1,
+      "cleanOutput": 1,
+      "judge": 1,
+      "firstTextSeconds": 14.81,
+      "totalSeconds": 18.852
+    }
+  },
+  {
+    "name": "number only on a third-party site",
+    "scores": {
+      "toolOrder": 1,
+      "toolsAvoided": 1,
+      "argsCorrect": 1,
+      "parallelCalls": 1,
+      "mentions": 1,
+      "citations": 1,
+      "attribution": 1,
+      "cleanOutput": 1,
+      "judge": 1,
+      "firstTextSeconds": 7.155,
+      "totalSeconds": 7.98
+    }
+  },
+  {
+    "name": "greeting",
+    "scores": {
+      "toolOrder": 1,
+      "toolsAvoided": 1,
+      "argsCorrect": 1,
+      "parallelCalls": 1,
+      "mentions": 1,
+      "citations": 1,
+      "attribution": 1,
+      "cleanOutput": 1,
+      "judge": 1,
+      "firstTextSeconds": 2.175,
+      "totalSeconds": 3.003
+    }
+  },
+  {
+    "name": "undated page: no invented date",
+    "scores": {
+      "toolOrder": 1,
+      "toolsAvoided": 1,
+      "argsCorrect": 1,
+      "parallelCalls": 1,
+      "mentions": 1,
+      "citations": 1,
+      "attribution": 1,
+      "cleanOutput": 1,
+      "judge": 1,
+      "firstTextSeconds": 12.829,
+      "totalSeconds": 13.667
+    }
+  },
+  {
+    "name": "official page over aggregators (regression)",
+    "scores": {
+      "toolOrder": 1,
+      "toolsAvoided": 1,
+      "argsCorrect": 1,
+      "parallelCalls": 1,
+      "mentions": 0.6,
+      "citations": 1,
+      "attribution": 1,
+      "cleanOutput": 1,
+      "judge": 0.5,
+      "firstTextSeconds": 6.977,
+      "totalSeconds": 8.428
+    }
+  },
+  {
+    "name": "follow-up keeps context",
+    "scores": {
+      "toolOrder": 1,
+      "toolsAvoided": 1,
+      "argsCorrect": 1,
+      "parallelCalls": 1,
+      "mentions": 1,
+      "citations": 1,
+      "attribution": 1,
+      "cleanOutput": 1,
+      "judge": 0.5,
+      "firstTextSeconds": 7.106,
+      "totalSeconds": 7.842
+    }
+  }
+]

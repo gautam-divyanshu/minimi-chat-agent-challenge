@@ -58,14 +58,17 @@ export type LoopResult = {
   messages: ModelMessage[]
 }
 
+/** What the model sees of our tools: name, description, schema. No `execute`. */
+export function toSdkTools(tools: AgentTool[]): ToolSet {
+  return Object.fromEntries(tools.map((t) => [t.name, sdkTool({ description: t.description, inputSchema: t.inputSchema })]))
+}
+
 export async function runAgentLoop(opts: LoopOptions): Promise<LoopResult> {
   const { model, system, tools, onEvent, signal } = opts
   const maxSteps = opts.maxSteps ?? 6
   const tracing = opts.tracing ?? noTracing
   const byName = new Map(tools.map((t) => [t.name, t]))
-  const sdkTools: ToolSet = Object.fromEntries(
-    tools.map((t) => [t.name, sdkTool({ description: t.description, inputSchema: t.inputSchema })]),
-  )
+  const sdkTools = toSdkTools(tools)
 
   const messages = [...opts.messages]
   const toolRuns: ToolRun[] = []

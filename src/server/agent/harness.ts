@@ -11,7 +11,7 @@ import { createRecallHistory } from './tools/recall-history'
 import { createWebSearch } from './tools/web-search'
 import { mentionsTimeWindow } from './dates'
 import { getTracing, type Tracing } from './tracing'
-import { cleanCitations } from '#/shared/citations'
+import { cleanCitations } from '../../shared/citations'
 
 /**
  * One chat turn, end to end. Framework-free: the HTTP route, evals and a CLI
@@ -30,7 +30,7 @@ export type TurnInput = {
   // Injection points for tests and evals:
   now?: number
   model?: LanguageModel
-  tools?: (ctx: { timezone: string; beforeMs: number }) => AgentTool[]
+  tools?: (ctx: { timezone: string; beforeMs: number; allowDates: boolean }) => AgentTool[]
   getDb?: typeof defaultGetDb
   tracing?: Tracing
 }
@@ -76,7 +76,7 @@ export async function runTurn(input: TurnInput): Promise<{ messageId: number }> 
   const allowDates = recentUserText.some(mentionsTimeWindow)
 
   const tools = input.tools
-    ? input.tools({ timezone, beforeMs: now })
+    ? input.tools({ timezone, beforeMs: now, allowDates })
     : [
         // 5 results, not Exa's default 10: see the note in web-search.ts.
         createWebSearch(undefined, { numResults: 5, allowDates }),

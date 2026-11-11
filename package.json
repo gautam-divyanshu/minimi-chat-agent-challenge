@@ -12,7 +12,10 @@
     "db:generate": "drizzle-kit generate",
     "test": "vitest run",
     "typecheck": "tsc --noEmit",
-    "test:live": "LIVE=1 vitest run live"
+    "test:live": "LIVE=1 vitest run live",
+    "eval": "lmnr eval",
+    "eval:tools": "lmnr eval evals/tool-selection.eval.ts",
+    "eval:agent": "lmnr eval evals/multi-turn.eval.ts"
   },
   "dependencies": {
     "@ai-sdk/openai": "^4.0.114",
