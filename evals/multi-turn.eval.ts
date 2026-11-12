@@ -1,19 +1,7 @@
 import { evaluate } from '@lmnr-ai/lmnr'
-import { withReport } from './report'
 import dataset from './data/multi-turn.json'
-import {
-  argsCorrect,
-  attribution,
-  brevity,
-  citations,
-  cleanOutput,
-  llmJudge,
-  mentions,
-  minCallsMet,
-  toolOrderCorrect,
-  toolsAvoided,
-} from './evaluators'
 import { multiTurn } from './executors'
+import { agentScorers } from './scorers'
 import type { MultiTurnData, MultiTurnTarget } from './types'
 
 /**
@@ -28,21 +16,7 @@ import type { MultiTurnData, MultiTurnTarget } from './types'
 evaluate({
   data: dataset as { data: MultiTurnData; target: MultiTurnTarget }[],
   executor: multiTurn,
-  evaluators: withReport('multi-turn', {
-    toolOrder: (output, target) => toolOrderCorrect(output, target ?? { rubric: '' }),
-    toolsAvoided: (output, target) => toolsAvoided(output, target ?? {}),
-    argsCorrect: (output, target) => argsCorrect(output, target?.args),
-    parallelCalls: (output, target) => minCallsMet(output, target?.minCalls),
-    mentions: (output, target) => mentions(output, target!),
-    citations: (output, target) => citations(output, target!),
-    attribution: (output, target) => attribution(output, target!),
-    cleanOutput: (output) => cleanOutput(output),
-    brevity: (output, target) => brevity(output, target!),
-    judge: (output, target, data) => llmJudge(output, target!, data!),
-    // Not 0..1: seconds, to watch speed alongside quality.
-    firstTextSeconds: (output) => output.firstTextSeconds,
-    totalSeconds: (output) => output.seconds,
-  }),
+  evaluators: agentScorers('multi-turn'),
   groupName: 'multi-turn',
   config: { projectApiKey: process.env.LMNR_PROJECT_API_KEY },
 })

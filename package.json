@@ -15,7 +15,8 @@
     "test:live": "LIVE=1 vitest run live",
     "eval": "lmnr eval",
     "eval:tools": "lmnr eval evals/tool-selection.eval.ts",
-    "eval:agent": "lmnr eval evals/multi-turn.eval.ts"
+    "eval:agent": "lmnr eval evals/multi-turn.eval.ts",
+    "eval:general": "lmnr eval evals/general.eval.ts"
   },
   "dependencies": {
     "@ai-sdk/openai": "^4.0.114",

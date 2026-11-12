@@ -1,0 +1,516 @@
+[
+  {
+    "data": {
+      "name": "news: primary source and date",
+      "prompts": [
+        "What's the latest on the Artemis IV mission?"
+      ],
+      "pages": [
+        {
+          "match": [
+            "artemis"
+          ],
+          "url": "https://nasa.gov/news/artemis-iv-schedule-update",
+          "title": "NASA Updates Artemis IV Schedule",
+          "text": "NASA announced on 8 November 2026 that Artemis IV is now targeted for no earlier than September 2028, moved from early 2028. The agency cited delays in delivery of the Gateway habitation module. The four-person crew assignment is unchanged.",
+          "publishedDate": "2026-11-08"
+        },
+        {
+          "match": [
+            "artemis"
+          ],
+          "url": "https://spacenews.com/artemis-iv-slips-to-late-2028",
+          "title": "Artemis IV slips to late 2028",
+          "text": "NASA has delayed Artemis IV to September 2028 at the earliest, officials said Sunday, pointing to the Gateway habitation module schedule.",
+          "publishedDate": "2026-11-09"
+        },
+        {
+          "match": [
+            "artemis"
+          ],
+          "url": "https://spacefanblog.net/artemis-rumours",
+          "title": "Artemis IV rumours roundup",
+          "text": "Unconfirmed: some say Artemis IV could be cancelled entirely.",
+          "publishedDate": "2026-10-20"
+        }
+      ]
+    },
+    "target": {
+      "expectedToolOrder": [
+        "web_search"
+      ],
+      "mustMention": [
+        "September 2028",
+        "Gateway"
+      ],
+      "mustCite": [
+        "nasa.gov"
+      ],
+      "mustNotMention": [
+        "cancel"
+      ],
+      "maxWords": 160,
+      "rubric": "Reports that NASA has moved Artemis IV to no earlier than September 2028 (announced 8 November 2026) because of delays to the Gateway habitation module. Cites nasa.gov. Leads with the news, a few sentences, no padding. Mentioning that the crew is unchanged is welcome but not required. Adds nothing the sources do not state."
+    }
+  },
+  {
+    "data": {
+      "name": "technical how-to from the docs, with code",
+      "prompts": [
+        "How do I turn on row level security for a table in Supabase and let users read only their own rows?"
+      ],
+      "pages": [
+        {
+          "match": [
+            "supabase",
+            "row level security",
+            "rls"
+          ],
+          "url": "https://supabase.com/docs/guides/database/postgres/row-level-security",
+          "title": "Row Level Security | Supabase Docs",
+          "text": "Enable RLS on a table: alter table profiles enable row level security; Once enabled, no rows are accessible via the API until you create policies. Example policy letting users read only their own rows: create policy \"Users can view own rows\" on profiles for select to authenticated using ( (select auth.uid()) = user_id );"
+        },
+        {
+          "match": [
+            "supabase",
+            "rls"
+          ],
+          "url": "https://devblogger.io/supabase-rls-in-5-minutes",
+          "title": "Supabase RLS in 5 minutes",
+          "text": "RLS is a Postgres feature. Turn it on in the dashboard under Authentication > Policies.",
+          "publishedDate": "2025-03-02"
+        }
+      ]
+    },
+    "target": {
+      "expectedToolOrder": [
+        "web_search"
+      ],
+      "mustMention": [
+        "enable row level security",
+        "create policy",
+        "auth\\.uid\\(\\)",
+        "```"
+      ],
+      "mustCite": [
+        "supabase.com"
+      ],
+      "rubric": "Gives the two SQL steps from the Supabase docs: `alter table ... enable row level security;` and a `create policy ... for select ... using (auth.uid() = user_id)` policy. SQL is in a fenced code block. Brief explanation of what each does. Cites supabase.com docs."
+    }
+  },
+  {
+    "data": {
+      "name": "short factual lookup stays short",
+      "prompts": [
+        "Who is the CEO of Nimbus DB?"
+      ],
+      "pages": [
+        {
+          "match": [
+            "nimbus"
+          ],
+          "url": "https://nimbusdb.com/about",
+          "title": "About | Nimbus DB",
+          "text": "Leadership: Lena Okafor, Chief Executive Officer (appointed October 2026). Tomas Reyes, founder, now Chair of the Board."
+        },
+        {
+          "match": [
+            "nimbus"
+          ],
+          "url": "https://startupwiki.org/nimbus-db",
+          "title": "Nimbus DB - StartupWiki",
+          "text": "Nimbus DB is a serverless database company. CEO: Tomas Reyes.",
+          "publishedDate": "2025-06-11"
+        }
+      ]
+    },
+    "target": {
+      "expectedToolOrder": [
+        "web_search"
+      ],
+      "mustMention": [
+        "Lena Okafor"
+      ],
+      "mustCite": [
+        "nimbusdb.com"
+      ],
+      "maxWords": 60,
+      "rubric": "States that Lena Okafor is the CEO of Nimbus DB. One or two sentences. Cites nimbusdb.com. Must not name Tomas Reyes as the current CEO. Mentioning the October 2026 appointment is welcome but not required."
+    }
+  },
+  {
+    "data": {
+      "name": "multi-hop: second search depends on the first",
+      "prompts": [
+        "Who founded the company that acquired Nimbus DB, and in what year was that company founded?"
+      ],
+      "pages": [
+        {
+          "match": [
+            "nimbus"
+          ],
+          "url": "https://nimbusdb.com/blog/joining-vertex-cloud",
+          "title": "Nimbus DB is joining Vertex Cloud",
+          "text": "Today we are announcing that Nimbus DB has been acquired by Vertex Cloud. The Nimbus DB product continues unchanged.",
+          "publishedDate": "2026-09-15"
+        },
+        {
+          "match": [
+            "vertex"
+          ],
+          "url": "https://vertexcloud.com/company",
+          "title": "Company | Vertex Cloud",
+          "text": "Vertex Cloud was founded in 2014 by Priya Raman and Daniel Cho in Bengaluru. Today the company has about 1,200 employees."
+        }
+      ]
+    },
+    "target": {
+      "expectedToolOrder": [
+        "web_search",
+        "web_search"
+      ],
+      "minCalls": {
+        "tool": "web_search",
+        "count": 2
+      },
+      "mustMention": [
+        "Vertex Cloud",
+        "Priya Raman",
+        "2014"
+      ],
+      "rubric": "Finds that Vertex Cloud acquired Nimbus DB, then that Vertex Cloud was founded in 2014 by Priya Raman and Daniel Cho. States all three facts. This needs a second search after the first; an answer that stops at 'Vertex Cloud acquired it' or guesses the founders fails."
+    }
+  },
+  {
+    "data": {
+      "name": "sources disagree: say so, prefer the primary",
+      "prompts": [
+        "How many employees does Vertex Cloud have?"
+      ],
+      "pages": [
+        {
+          "match": [
+            "vertex"
+          ],
+          "url": "https://vertexcloud.com/company",
+          "title": "Company | Vertex Cloud",
+          "text": "Vertex Cloud was founded in 2014. Today the company has about 1,200 employees across four offices."
+        },
+        {
+          "match": [
+            "vertex"
+          ],
+          "url": "https://techradarnews.com/vertex-cloud-profile",
+          "title": "Vertex Cloud: a profile",
+          "text": "Vertex Cloud employs around 2,000 people worldwide.",
+          "publishedDate": "2025-01-14"
+        }
+      ]
+    },
+    "target": {
+      "expectedToolOrder": [
+        "web_search"
+      ],
+      "mustMention": [
+        "1,?200"
+      ],
+      "mustCite": [
+        "vertexcloud.com"
+      ],
+      "maxWords": 90,
+      "rubric": "Gives about 1,200 employees from Vertex Cloud's own company page as the answer. Either notes that an older third-party article says 2,000, or simply prefers the company's figure. Must not present 2,000 as the answer or average the two."
+    }
+  },
+  {
+    "data": {
+      "name": "nothing found: says so, invents nothing",
+      "prompts": [
+        "What is the battery life of the Orion X2 headphones from Kestrel Audio?"
+      ],
+      "pages": [
+        {
+          "match": [
+            "zzz-no-match"
+          ],
+          "url": "https://example.org/unrelated",
+          "title": "Unrelated",
+          "text": "Unrelated page."
+        }
+      ]
+    },
+    "target": {
+      "expectedToolOrder": [
+        "web_search"
+      ],
+      "mustNotMention": [
+        "\\b\\d+\\s*(hours|hrs|h)\\b",
+        "can.t (reach|access)",
+        "unable to (reach|access)"
+      ],
+      "maxWords": 90,
+      "rubric": "Says it could not find a source for the Orion X2's battery life (the searches returned nothing relevant). Does not state any battery life figure. May suggest checking the manufacturer's page. Short."
+    }
+  },
+  {
+    "data": {
+      "name": "wrong premise is corrected",
+      "prompts": [
+        "Why did Nimbus DB shut down last month?"
+      ],
+      "pages": [
+        {
+          "match": [
+            "nimbus"
+          ],
+          "url": "https://nimbusdb.com/blog/joining-vertex-cloud",
+          "title": "Nimbus DB is joining Vertex Cloud",
+          "text": "Today we are announcing that Nimbus DB has been acquired by Vertex Cloud. The Nimbus DB product continues unchanged, with the same team and pricing.",
+          "publishedDate": "2026-09-15"
+        },
+        {
+          "match": [
+            "nimbus"
+          ],
+          "url": "https://status.nimbusdb.com",
+          "title": "Nimbus DB Status",
+          "text": "All systems operational."
+        }
+      ]
+    },
+    "target": {
+      "expectedToolOrder": [
+        "web_search"
+      ],
+      "mustMention": [
+        "acqui|joining",
+        "Vertex Cloud"
+      ],
+      "mustCite": [
+        "nimbusdb.com"
+      ],
+      "maxWords": 120,
+      "rubric": "Corrects the premise: Nimbus DB did not shut down; it was acquired by Vertex Cloud (announced 15 September 2026) and the product continues. Does not invent reasons for a shutdown. Cites nimbusdb.com."
+    }
+  },
+  {
+    "data": {
+      "name": "follow-up resolves 'they' and searches for the person",
+      "prompts": [
+        "Who won the 2026 Booker Prize?",
+        "What else have they written?"
+      ],
+      "pages": [
+        {
+          "match": [
+            "booker"
+          ],
+          "url": "https://thebookerprizes.com/2026-winner",
+          "title": "The Booker Prize 2026 winner",
+          "text": "Asha Menon has won the 2026 Booker Prize for her novel The Salt Road.",
+          "publishedDate": "2026-11-03"
+        },
+        {
+          "match": [
+            "asha menon",
+            "menon"
+          ],
+          "url": "https://thebookerprizes.com/authors/asha-menon",
+          "title": "Asha Menon | The Booker Prizes",
+          "text": "Asha Menon is the author of three novels: Monsoon Ledger (2019), The Glass Harbour (2022) and The Salt Road (2026)."
+        }
+      ]
+    },
+    "target": {
+      "expectedToolOrder": [
+        "web_search"
+      ],
+      "args": [
+        {
+          "tool": "web_search",
+          "arg": "query",
+          "contains": "Menon"
+        }
+      ],
+      "mustMention": [
+        "Monsoon Ledger",
+        "Glass Harbour"
+      ],
+      "forbiddenTools": [
+        "recall_history"
+      ],
+      "rubric": "Understands 'they' as Asha Menon (the winner from the previous turn) and lists her earlier novels: 'Monsoon Ledger' (2019) and 'The Glass Harbour' (2022). Cites the source the list came from. Does not ask who 'they' refers to."
+    }
+  },
+  {
+    "data": {
+      "name": "non-pricing comparison ends in a recommendation",
+      "prompts": [
+        "Bun or Deno for a new API server that depends on a lot of npm packages? Which is the safer pick right now?"
+      ],
+      "pages": [
+        {
+          "match": [
+            "bun"
+          ],
+          "url": "https://bun.sh/docs/runtime/nodejs-apis",
+          "title": "Node.js compatibility | Bun Docs",
+          "text": "Bun aims to be a drop-in replacement for Node.js. Most npm packages run unchanged. node:fs, node:http, node:crypto and node:worker_threads are fully implemented. Native addons via N-API are supported."
+        },
+        {
+          "match": [
+            "deno"
+          ],
+          "url": "https://docs.deno.com/runtime/fundamentals/node/",
+          "title": "Node and npm support | Deno Docs",
+          "text": "Deno can import npm packages with npm: specifiers and supports package.json. Most packages work. Packages that rely on native addons require the --allow-ffi flag and a node_modules directory."
+        }
+      ]
+    },
+    "target": {
+      "expectedToolOrder": [
+        "web_search"
+      ],
+      "minCalls": {
+        "tool": "web_search",
+        "count": 2
+      },
+      "mustCite": [
+        "bun.sh",
+        "docs.deno.com"
+      ],
+      "maxWords": 260,
+      "rubric": "Compares the two on npm/Node compatibility using the sources (Bun: drop-in Node replacement, runs most npm packages unchanged; Deno: npm: specifiers, most packages work, native addons need a flag) and gives a clear recommendation for this use case with one or two reasons. Cites both official sites. Does not end with 'it depends' and no pick."
+    }
+  },
+  {
+    "data": {
+      "name": "recommendation uses what the user said earlier",
+      "prompts": [
+        "I'm building a small internal tool: about 100 users, almost all reads, one server.",
+        "SQLite or Postgres?"
+      ]
+    },
+    "target": {
+      "forbiddenTools": [
+        "recall_history"
+      ],
+      "mustMention": [
+        "SQLite",
+        "100|read|one server|single server"
+      ],
+      "maxWords": 170,
+      "rubric": "Names one pick in the first sentence and ties the reasons to what the user said (about 100 users, almost all reads, one server). SQLite is the natural pick here; Postgres is acceptable only if the reasons address those stated facts rather than generic strengths. One line on when the other is better. Short: no setup tips or feature lists. Does not ask the user to restate their requirements."
+    }
+  },
+  {
+    "data": {
+      "name": "asked for depth: brevity rules must not cut it short",
+      "prompts": [
+        "Explain in detail how HTTP/3 differs from HTTP/2. I'm preparing for an interview."
+      ]
+    },
+    "target": {
+      "forbiddenTools": [
+        "recall_history"
+      ],
+      "mustMention": [
+        "QUIC",
+        "UDP",
+        "head.of.line",
+        "QPACK"
+      ],
+      "rubric": "A thorough, accurate explanation covering at least: HTTP/3 runs over QUIC on UDP instead of TCP; it removes transport-level head-of-line blocking; TLS 1.3 is built into QUIC with faster (1-RTT/0-RTT) connection setup; connection migration; QPACK instead of HPACK. Organised with headings or a table. A two-to-four sentence answer fails: the user asked for detail."
+    }
+  },
+  {
+    "data": {
+      "name": "answers in the user's language",
+      "prompts": [
+        "¿Cuál es la capital de Australia?"
+      ]
+    },
+    "target": {
+      "forbiddenTools": [
+        "recall_history",
+        "web_search"
+      ],
+      "mustMention": [
+        "Canberra",
+        "\\b(la|es|de)\\b"
+      ],
+      "maxWords": 40,
+      "rubric": "Answers in Spanish that the capital of Australia is Canberra. One or two short sentences. No search needed."
+    }
+  },
+  {
+    "data": {
+      "name": "reads a link the user gives",
+      "prompts": [
+        "Can you summarise this for me? https://vertexcloud.com/blog/edge-runtime-ga"
+      ],
+      "pages": [
+        {
+          "match": [
+            "vertexcloud.com/blog/edge-runtime-ga",
+            "edge runtime",
+            "vertex"
+          ],
+          "url": "https://vertexcloud.com/blog/edge-runtime-ga",
+          "title": "Edge Runtime is now generally available",
+          "text": "Today, 4 November 2026, Vertex Cloud Edge Runtime is generally available. It runs in 38 regions with cold starts under 5 ms. The free tier includes 1 million requests per month.",
+          "publishedDate": "2026-11-04"
+        }
+      ]
+    },
+    "target": {
+      "expectedToolOrder": [
+        "web_search"
+      ],
+      "mustMention": [
+        "38",
+        "5 ?ms",
+        "1 million"
+      ],
+      "mustCite": [
+        "vertexcloud.com"
+      ],
+      "maxWords": 150,
+      "rubric": "Summarises the linked post: Vertex Cloud's Edge Runtime is generally available as of 4 November 2026, runs in 38 regions, has cold starts under 5 ms, and the free tier includes 1 million requests per month. Cites the vertexcloud.com post. Does not say it cannot open links."
+    }
+  },
+  {
+    "data": {
+      "name": "everyday question: weather today",
+      "prompts": [
+        "What's the weather like in Bengaluru today?"
+      ],
+      "pages": [
+        {
+          "match": [
+            "bengaluru",
+            "bangalore",
+            "weather"
+          ],
+          "url": "https://mausam.imd.gov.in/bengaluru",
+          "title": "Bengaluru City Weather Forecast | IMD",
+          "text": "Bengaluru, 11 November 2026: partly cloudy sky with one or two spells of rain or thundershowers towards evening. Maximum 27°C, minimum 19°C.",
+          "publishedDate": "2026-11-11"
+        }
+      ]
+    },
+    "target": {
+      "expectedToolOrder": [
+        "web_search"
+      ],
+      "mustMention": [
+        "27",
+        "19"
+      ],
+      "mustCite": [
+        "mausam.imd.gov.in"
+      ],
+      "maxWords": 80,
+      "rubric": "Gives today's Bengaluru weather from the source: about 27°C high and 19°C low, partly cloudy with a chance of evening showers. Short, cites the source. Adds nothing the source does not state (no humidity, wind or advice)."
+    }
+  }
+]

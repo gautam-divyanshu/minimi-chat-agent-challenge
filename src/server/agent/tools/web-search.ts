@@ -66,6 +66,9 @@ export type WebSearchOptions = {
   defaultSince?: string
 }
 
+// An empty list alone reads to the model like a broken tool ("I can't reach the web").
+const NO_RESULTS = 'The search ran and found no matching pages. Search is working: rephrase the query once, or tell the user nothing was found for it.'
+
 export function createWebSearch(getClient: () => ExaClient = defaultClient, opts: WebSearchOptions = {}) {
   return defineTool({
     name: 'web_search',
@@ -115,10 +118,15 @@ export function createWebSearch(getClient: () => ExaClient = defaultClient, opts
     const wantsDates = Boolean(since || until)
     if (!wantsDates || opts.allowDates === false) {
       const res = await search(false)
+      const results = res.results.map(toResult)
       return {
         searchedAt,
-        note: wantsDates ? 'Date filter ignored: the user gave no time window. These are current results.' : undefined,
-        results: res.results.map(toResult),
+        note: !results.length
+          ? NO_RESULTS
+          : wantsDates
+            ? 'Date filter ignored: the user gave no time window. These are current results.'
+            : undefined,
+        results,
       }
     }
 
@@ -133,6 +141,7 @@ export function createWebSearch(getClient: () => ExaClient = defaultClient, opts
     results.push(...fresh.map((r) => ({ ...r, inWindow: true })))
 
     const found = results.filter((r) => r.inWindow).length
+    if (!results.length) return { searchedAt, note: NO_RESULTS, results }
     return {
       searchedAt,
       note:

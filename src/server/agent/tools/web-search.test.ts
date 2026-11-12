@@ -95,6 +95,12 @@ describe('web_search', () => {
     expect(tool.refineInput!({ query: 'q', objective: 'o', since: '2026-01-01' })).toMatchObject({ since: undefined, until: undefined })
   })
 
+  it('tells the model an empty result is not a broken search', async () => {
+    const { tool } = fakeExa({ undated: [], dated: [] })
+    expect((await tool.execute({ query: 'q', objective: 'o' }, { signal })).note).toMatch(/found no matching pages/)
+    expect((await tool.execute({ query: 'q', objective: 'o', since: '2026-11-09' }, { signal })).note).toMatch(/found no matching pages/)
+  })
+
   it('turns key problems into a message that says what to fix', async () => {
     const rejected = Object.assign(new Error('Request failed'), { statusCode: 401 })
     const bad = createWebSearch(() => ({ search: async () => { throw rejected } }) as any)
