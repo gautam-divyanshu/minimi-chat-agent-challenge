@@ -1,7 +1,7 @@
 import { and, asc, eq, gt, gte, inArray, lt, sql } from 'drizzle-orm'
 import { z } from 'zod'
 import { getDb as defaultGetDb } from '../../db/client'
-import { claims, conversations, messages } from '../../db/schema'
+import { conversations, messages } from '../../db/schema'
 import { endOfDayMs, formatLocal, startOfDayMs } from '../dates'
 import { defineTool } from '../tool'
 
@@ -11,9 +11,8 @@ import { defineTool } from '../tool'
  * 3 November?" are answered from records, never invented.
  *
  * Exact by design: date ranges are SQL on a real column, keywords are FTS5.
- * Each matched question comes back with the answer we gave, plus the claims
- * (prices, versions…) extracted from that answer, so "is it still correct?"
- * can be checked against a fresh search.
+ * Each matched question comes back with the answer we gave, which keeps its
+ * cited links, so "is it still correct?" can be checked against a fresh search.
  */
 
 type Handle = ReturnType<typeof defaultGetDb>
@@ -43,7 +42,6 @@ export type RecalledMessage = {
   at: string
   atIso: string
   text: string
-  claims?: { entity: string; attribute: string; value: string; sourceUrl: string | null; observedAt: string }[]
 }
 
 export type RecallOutput = {
@@ -135,12 +133,6 @@ export function createRecallHistory(ctx: RecallContext) {
       // Date-only ranges keep the most recent messages when over the cap.
       if (truncated) hits = hits.slice(-MAX_MESSAGES)
 
-      const claimRows = await db
-        .select()
-        .from(claims)
-        .where(inArray(claims.messageId, hits.map((h) => h.id)))
-      const claimsByMessage = Map.groupBy(claimRows, (c) => c.messageId)
-
       return {
         found: hits.length,
         searched,
@@ -152,13 +144,6 @@ export function createRecallHistory(ctx: RecallContext) {
           at: formatLocal(h.createdAt, tz),
           atIso: new Date(h.createdAt).toISOString(),
           text: clip(h.text, MAX_CHARS[h.role]),
-          claims: claimsByMessage.get(h.id)?.map((c) => ({
-            entity: c.entity,
-            attribute: c.attribute,
-            value: c.value,
-            sourceUrl: c.sourceUrl,
-            observedAt: new Date(c.observedAt).toISOString().slice(0, 10),
-          })),
         })),
       }
     },

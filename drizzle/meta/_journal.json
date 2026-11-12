@@ -22,6 +22,13 @@
       "when": 1794415204705,
       "tag": "0002_message_status",
       "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "6",
+      "when": 1794499692666,
+      "tag": "0003_drop_claims",
+      "breakpoints": true
     }
   ]
 }

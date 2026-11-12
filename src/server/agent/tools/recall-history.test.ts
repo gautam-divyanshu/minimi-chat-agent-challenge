@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, it } from 'vitest'
 import { createTestDb } from '#/server/db/client'
-import { claims, conversations, messages } from '#/server/db/schema'
+import { conversations, messages } from '#/server/db/schema'
 import { createRecallHistory } from './recall-history'
 
 const TZ = 'Asia/Kolkata'
@@ -30,14 +30,6 @@ async function seed() {
     { conversationId: 'c2', role: 'user', text: 'Shortlist CRM tools for a 20-person sales team', createdAt: nov10, timezone: TZ },
     { conversationId: 'c2', role: 'assistant', text: 'HubSpot, Pipedrive, Salesforce, Close, Attio.', createdAt: nov10 + 20_000, timezone: TZ },
   ])
-  await db.insert(claims).values({
-    messageId: a1.id,
-    entity: 'Supabase',
-    attribute: 'Pro plan price',
-    value: '$25/month',
-    sourceUrl: 'https://supabase.com/pricing',
-    observedAt: nov3,
-  })
   return { q1, a1 }
 }
 
@@ -56,14 +48,12 @@ describe('recall_history', () => {
     expect(out).toMatchObject({ found: 0, messages: [], note: 'No conversations found in this range.' })
   })
 
-  it("finds a day's conversation in the user's timezone, with claims", async () => {
+  it("finds a day's conversation in the user's timezone", async () => {
     await seed()
     const out = await tool().execute({ from: '2026-11-03', to: '2026-11-03' }, { signal })
     expect(out.found).toBe(2)
     expect(out.messages[0]).toMatchObject({ role: 'user', at: 'Tue, 3 Nov 2026, 14:05', conversationTitle: 'Postgres hosting' })
-    expect(out.messages[1].claims).toEqual([
-      { entity: 'Supabase', attribute: 'Pro plan price', value: '$25/month', sourceUrl: 'https://supabase.com/pricing', observedAt: '2026-11-03' },
-    ])
+    expect(out.messages[1]).toMatchObject({ role: 'assistant', text: 'Supabase Pro is $25/month; Neon Launch is usage-based.' })
   })
 
   it('misses days with no conversations', async () => {

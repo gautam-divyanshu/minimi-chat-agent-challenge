@@ -36,7 +36,7 @@ Agent harness (src/server/agent/)
      Every event is streamed to the browser and saved as it happens
   4. Save the final answer
   ▼
-SQLite: conversations · messages · tool_events · claims · messages_fts (FTS5)
+SQLite: conversations · messages · tool_events · messages_fts (FTS5)
 ```
 
 - `src/server/agent/loop.ts`: the agent loop. The AI SDK makes one streamed model call per step; the loop runs the tools itself.

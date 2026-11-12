@@ -48,26 +48,6 @@ export const toolEvents = sqliteTable(
   (t) => [index('tool_events_message_idx').on(t.messageId)],
 )
 
-export const claims = sqliteTable(
-  'claims',
-  {
-    id: integer('id').primaryKey({ autoIncrement: true }),
-    messageId: integer('message_id')
-      .notNull()
-      .references(() => messages.id, { onDelete: 'cascade' }),
-    entity: text('entity').notNull(),
-    attribute: text('attribute').notNull(),
-    value: text('value').notNull(),
-    sourceUrl: text('source_url'),
-    observedAt: integer('observed_at').notNull(),
-  },
-  (t) => [
-    index('claims_message_idx').on(t.messageId),
-    index('claims_entity_idx').on(t.entity),
-  ],
-)
-
 export type Conversation = typeof conversations.$inferSelect
 export type Message = typeof messages.$inferSelect
 export type ToolEvent = typeof toolEvents.$inferSelect
-export type Claim = typeof claims.$inferSelect

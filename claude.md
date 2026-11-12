@@ -40,16 +40,14 @@ Server route → agent harness
   4. Loop (max 6 steps): model → tool calls → execute in parallel with timeouts → append results
      Emit every event to SSE AND persist it as it happens
   5. Save final answer → emit turn_done
-  6. Background (after streaming finishes, never blocking the reply): extract claims, set chat title
   ▼
-SQLite: conversations · messages · tool_events · claims · messages_fts
+SQLite: conversations · messages · tool_events · messages_fts
 ```
 
 ## Data model
 - `conversations`: id, title, created_at
 - `messages`: id, conversation_id, role, text, created_at (UTC ms integer), timezone (IANA)
 - `tool_events`: id, message_id, tool, input (JSON), output (JSON), started_at, duration_ms
-- `claims`: id, message_id, entity, attribute, value, source_url, observed_at
 - `messages_fts`: FTS5 index over messages.text
 - Rule: everything we query is a real column. Only tool input/output is JSON. Timestamps are UTC ms integers.
 
@@ -64,7 +62,7 @@ SQLite: conversations · messages · tool_events · claims · messages_fts
 - Harness sets `allowDates: false` unless the user named a time window in the last 3 user messages (`mentionsTimeWindow` in `dates.ts`); since/until are then ignored
 
 `recall_history({ from?, to?, query? })`
-- Past messages by date range and/or FTS5 keywords, with timestamps + their stored claims
+- Past messages by date range and/or FTS5 keywords, with timestamps; stored answers keep their cited links
 - Returns explicit "no conversations found in this range" when empty
 - DESIGN.md must justify this second tool: web_search is the only *external* tool; recall_history is the agent's own memory
 
@@ -90,7 +88,7 @@ Day 1 — foundation
 
 Day 2 — differentiators
 6. chrono-node date resolution + browser timezone, with unit tests
-7. Background claim extraction; claims included in recall_history results
+7. ~~Claim extraction~~ dropped: recalled answers already carry their cited prices and links
 8. Compaction: running summary once history passes a token threshold
 9. Evals: 15–20 seeded scenarios (empty memory, price changed since date, nothing changed, ambiguous date, 5 parallel searches, search failure), LLM judge, results in README
 10. Polish: time-to-first-event speed pass, error states, README, DESIGN.md
