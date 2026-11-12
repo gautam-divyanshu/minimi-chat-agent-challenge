@@ -21,6 +21,10 @@ export const messages = sqliteTable(
     text: text('text').notNull(),
     createdAt: integer('created_at').notNull(),
     timezone: text('timezone').notNull(),
+    // streaming: being written now. interrupted: the server stopped mid-answer.
+    status: text('status', { enum: ['done', 'streaming', 'stopped', 'interrupted', 'error'] })
+      .notNull()
+      .default('done'),
   },
   (t) => [
     index('messages_conversation_idx').on(t.conversationId, t.createdAt),

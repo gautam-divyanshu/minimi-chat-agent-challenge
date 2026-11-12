@@ -15,6 +15,7 @@ export type MessageView = {
   role: 'user' | 'assistant'
   text: string
   createdAt: number
+  status: 'done' | 'streaming' | 'stopped' | 'interrupted' | 'error'
   tools: ToolCallView[]
 }
 
@@ -51,6 +52,7 @@ export async function getConversation(id: string): Promise<{ id: string; title: 
       role: r.role,
       text: r.text,
       createdAt: r.createdAt,
+      status: r.status,
       tools: (byMessage.get(r.id) ?? []).map((e) => {
         const out = e.output as Record<string, unknown> | null
         const error = typeof out?.error === 'string' ? out.error : undefined

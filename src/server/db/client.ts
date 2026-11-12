@@ -67,8 +67,21 @@ function init(path: string): Handle {
 const g = globalThis as typeof globalThis & { __chatDb?: Handle }
 
 export function getDb(): Handle {
-  g.__chatDb ??= init(DB_PATH)
+  g.__chatDb ??= recoverInterrupted(init(DB_PATH))
   return g.__chatDb
+}
+
+/**
+ * Runs once per process, when the database is first opened. Any answer still
+ * marked `streaming` belongs to a turn that died with the previous process
+ * (crash or restart); mark it so the UI can say so instead of showing a
+ * half-written answer as if it were complete.
+ */
+export function recoverInterrupted(handle: Handle): Handle {
+  const ready = handle.ready.then(() => {
+    handle.sqlite.exec("UPDATE messages SET status = 'interrupted' WHERE status = 'streaming'")
+  })
+  return { ...handle, ready }
 }
 
 /** Fresh in-memory database, for tests and evals. */

@@ -13,6 +13,8 @@ import { Route as Char123ConversationIdChar125RouteImport } from './routes/{-$co
 import { Route as ApiChatRouteImport } from './routes/api/chat'
 import { Route as ApiConversationsRouteImport } from './routes/api/conversations'
 import { Route as ApiConversationsIdRouteImport } from './routes/api/conversations.$id'
+import { Route as ApiConversationsIdStopRouteImport } from './routes/api/conversations.$id.stop'
+import { Route as ApiConversationsIdStreamRouteImport } from './routes/api/conversations.$id.stream'
 
 const Char123ConversationIdChar125Route =
   Char123ConversationIdChar125RouteImport.update({
@@ -35,25 +37,42 @@ const ApiConversationsIdRoute = ApiConversationsIdRouteImport.update({
   path: '/$id',
   getParentRoute: () => ApiConversationsRoute,
 } as any)
+const ApiConversationsIdStopRoute = ApiConversationsIdStopRouteImport.update({
+  id: '/stop',
+  path: '/stop',
+  getParentRoute: () => ApiConversationsIdRoute,
+} as any)
+const ApiConversationsIdStreamRoute =
+  ApiConversationsIdStreamRouteImport.update({
+    id: '/stream',
+    path: '/stream',
+    getParentRoute: () => ApiConversationsIdRoute,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/{-$conversationId}': typeof Char123ConversationIdChar125Route
   '/api/chat': typeof ApiChatRoute
   '/api/conversations': typeof ApiConversationsRouteWithChildren
-  '/api/conversations/$id': typeof ApiConversationsIdRoute
+  '/api/conversations/$id': typeof ApiConversationsIdRouteWithChildren
+  '/api/conversations/$id/stop': typeof ApiConversationsIdStopRoute
+  '/api/conversations/$id/stream': typeof ApiConversationsIdStreamRoute
 }
 export interface FileRoutesByTo {
   '/{-$conversationId}': typeof Char123ConversationIdChar125Route
   '/api/chat': typeof ApiChatRoute
   '/api/conversations': typeof ApiConversationsRouteWithChildren
-  '/api/conversations/$id': typeof ApiConversationsIdRoute
+  '/api/conversations/$id': typeof ApiConversationsIdRouteWithChildren
+  '/api/conversations/$id/stop': typeof ApiConversationsIdStopRoute
+  '/api/conversations/$id/stream': typeof ApiConversationsIdStreamRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/{-$conversationId}': typeof Char123ConversationIdChar125Route
   '/api/chat': typeof ApiChatRoute
   '/api/conversations': typeof ApiConversationsRouteWithChildren
-  '/api/conversations/$id': typeof ApiConversationsIdRoute
+  '/api/conversations/$id': typeof ApiConversationsIdRouteWithChildren
+  '/api/conversations/$id/stop': typeof ApiConversationsIdStopRoute
+  '/api/conversations/$id/stream': typeof ApiConversationsIdStreamRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -62,18 +81,24 @@ export interface FileRouteTypes {
     | '/api/chat'
     | '/api/conversations'
     | '/api/conversations/$id'
+    | '/api/conversations/$id/stop'
+    | '/api/conversations/$id/stream'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/{-$conversationId}'
     | '/api/chat'
     | '/api/conversations'
     | '/api/conversations/$id'
+    | '/api/conversations/$id/stop'
+    | '/api/conversations/$id/stream'
   id:
     | '__root__'
     | '/{-$conversationId}'
     | '/api/chat'
     | '/api/conversations'
     | '/api/conversations/$id'
+    | '/api/conversations/$id/stop'
+    | '/api/conversations/$id/stream'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -112,15 +137,42 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiConversationsIdRouteImport
       parentRoute: typeof ApiConversationsRoute
     }
+    '/api/conversations/$id/stop': {
+      id: '/api/conversations/$id/stop'
+      path: '/stop'
+      fullPath: '/api/conversations/$id/stop'
+      preLoaderRoute: typeof ApiConversationsIdStopRouteImport
+      parentRoute: typeof ApiConversationsIdRoute
+    }
+    '/api/conversations/$id/stream': {
+      id: '/api/conversations/$id/stream'
+      path: '/stream'
+      fullPath: '/api/conversations/$id/stream'
+      preLoaderRoute: typeof ApiConversationsIdStreamRouteImport
+      parentRoute: typeof ApiConversationsIdRoute
+    }
   }
 }
 
+interface ApiConversationsIdRouteChildren {
+  ApiConversationsIdStopRoute: typeof ApiConversationsIdStopRoute
+  ApiConversationsIdStreamRoute: typeof ApiConversationsIdStreamRoute
+}
+
+const ApiConversationsIdRouteChildren: ApiConversationsIdRouteChildren = {
+  ApiConversationsIdStopRoute: ApiConversationsIdStopRoute,
+  ApiConversationsIdStreamRoute: ApiConversationsIdStreamRoute,
+}
+
+const ApiConversationsIdRouteWithChildren =
+  ApiConversationsIdRoute._addFileChildren(ApiConversationsIdRouteChildren)
+
 interface ApiConversationsRouteChildren {
-  ApiConversationsIdRoute: typeof ApiConversationsIdRoute
+  ApiConversationsIdRoute: typeof ApiConversationsIdRouteWithChildren
 }
 
 const ApiConversationsRouteChildren: ApiConversationsRouteChildren = {
-  ApiConversationsIdRoute: ApiConversationsIdRoute,
+  ApiConversationsIdRoute: ApiConversationsIdRouteWithChildren,
 }
 
 const ApiConversationsRouteWithChildren =

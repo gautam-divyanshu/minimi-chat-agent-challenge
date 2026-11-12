@@ -73,6 +73,30 @@
           "arg": "since",
           "equals": "2026-11-09"
         }
+      ],
+      "forbiddenTools": [
+        "recall_history"
+      ]
+    }
+  },
+  {
+    "data": {
+      "prompt": "Has Supabase changed its Pro price since last Friday?"
+    },
+    "target": {
+      "category": "golden",
+      "expectedTools": [
+        "web_search"
+      ],
+      "forbiddenTools": [
+        "recall_history"
+      ],
+      "args": [
+        {
+          "tool": "web_search",
+          "arg": "since",
+          "equals": "2026-11-06"
+        }
       ]
     }
   },

@@ -1,6 +1,6 @@
 import { streamText } from 'ai'
 import '../src/server/env'
-import { formatDateHints, resolveDates, startOfDayMs } from '../src/server/agent/dates'
+import { formatDateHints, mentionsTimeWindow, resolveDates, startOfDayMs } from '../src/server/agent/dates'
 import { runTurn } from '../src/server/agent/harness'
 import { toSdkTools } from '../src/server/agent/loop'
 import { getModel, MODEL_SETTINGS } from '../src/server/agent/model'
@@ -10,6 +10,7 @@ import { createWebSearch } from '../src/server/agent/tools/web-search'
 import { getTracing } from '../src/server/agent/tracing'
 import { createTestDb } from '../src/server/db/client'
 import { conversations, messages, toolEvents } from '../src/server/db/schema'
+import type { AgentTool } from '../src/server/agent/tool'
 import { fakeExa } from './mocks/exa'
 import type { MultiTurnData, MultiTurnResult, SingleTurnData, SingleTurnResult, ToolCall } from './types'
 
@@ -24,10 +25,17 @@ export const EVAL_NOW = Date.UTC(2026, 10, 11, 6, 30)
  * schemas. Tools are not executed; we only look at what the model asked for.
  */
 export async function singleTurn(data: SingleTurnData): Promise<SingleTurnResult> {
+  // Same per-message setup as the harness: resolved dates, and the date window
+  // it enforces on web_search when the model leaves `since` out.
+  const dates = resolveDates(data.prompt, EVAL_NOW, EVAL_TZ)
   const tools = [
-    createWebSearch(() => fakeExa([]) as any),
+    createWebSearch(() => fakeExa([]) as any, {
+      allowDates: mentionsTimeWindow(data.prompt),
+      defaultSince: dates.map((d) => d.from).sort()[0],
+    }),
     createRecallHistory({ timezone: EVAL_TZ, beforeMs: EVAL_NOW }),
   ]
+  const byName = new Map<string, AgentTool>(tools.map((t) => [t.name, t]))
   const t0 = Date.now()
   const result = streamText({
     model: getModel(),
@@ -36,7 +44,7 @@ export async function singleTurn(data: SingleTurnData): Promise<SingleTurnResult
     system: buildSystemPrompt({
       now: new Date(EVAL_NOW),
       timezone: EVAL_TZ,
-      dateHints: formatDateHints(resolveDates(data.prompt, EVAL_NOW, EVAL_TZ)),
+      dateHints: formatDateHints(dates),
     }),
     messages: [{ role: 'user', content: data.prompt }],
     tools: toSdkTools(tools),
@@ -47,7 +55,13 @@ export async function singleTurn(data: SingleTurnData): Promise<SingleTurnResult
   let text = ''
   for await (const part of result.stream) {
     if (part.type === 'text-delta') text += part.text
-    if (part.type === 'tool-call') toolCalls.push({ toolName: part.toolName, args: (part.input ?? {}) as Record<string, unknown> })
+    if (part.type === 'tool-call') {
+      // Score the input that would actually run: the harness refines it first.
+      const tool = byName.get(part.toolName)
+      const parsed = tool?.inputSchema.safeParse(part.input)
+      const args = parsed?.success && tool?.refineInput ? tool.refineInput(parsed.data) : (part.input ?? {})
+      toolCalls.push({ toolName: part.toolName, args: args as Record<string, unknown> })
+    }
     if (part.type === 'error') throw part.error
   }
   return { toolCalls, toolNames: toolCalls.map((t) => t.toolName), text, seconds: (Date.now() - t0) / 1000 }

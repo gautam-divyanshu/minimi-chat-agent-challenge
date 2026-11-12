@@ -653,5 +653,59 @@
       ],
       "rubric": "Gives per-seat prices ($20 and $29) AND the monthly totals for 20 people: $400 for HubSpot Sales Hub Starter and $580 for Pipedrive Advanced."
     }
+  },
+  {
+    "data": {
+      "name": "'changed since' about the world, not about our chats",
+      "prompts": [
+        "Has Supabase changed its Pro price since last Friday?"
+      ],
+      "pages": [
+        {
+          "match": [
+            "supabase"
+          ],
+          "url": "https://supabase.com/pricing",
+          "title": "Pricing & Fees | Supabase",
+          "text": "Pro plan: $25 per month per organization. Includes $10 in compute credits."
+        },
+        {
+          "match": [
+            "supabase"
+          ],
+          "url": "https://supabase.com/changelog",
+          "title": "Changelog | Supabase",
+          "publishedDate": "2026-11-09",
+          "text": "9 November 2026: Realtime broadcast from database is generally available. No pricing changes."
+        }
+      ]
+    },
+    "target": {
+      "expectedToolOrder": [
+        "web_search"
+      ],
+      "forbiddenTools": [
+        "recall_history"
+      ],
+      "args": [
+        {
+          "tool": "web_search",
+          "arg": "since",
+          "equals": "2026-11-06"
+        }
+      ],
+      "mustMention": [
+        "\\$25"
+      ],
+      "mustNotMention": [
+        "no record",
+        "past conversation",
+        "earlier conversation"
+      ],
+      "mustCite": [
+        "supabase.com"
+      ],
+      "rubric": "Says no Pro price change was found since Friday 6 November: the pricing page lists Pro at $25 per month. Does not talk about past conversations or missing records; the user did not refer to any."
+    }
   }
 ]

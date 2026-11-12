@@ -16,8 +16,9 @@ import { cleanCitations } from '../../shared/citations'
 /**
  * One chat turn, end to end. Framework-free: the HTTP route, evals and a CLI
  * all call this. The database is the source of truth; every event is both
- * emitted (to the stream) and persisted as it happens, so a dropped
- * connection loses nothing.
+ * emitted (to the stream) and persisted as it happens: tool events when they
+ * finish, the answer text every SAVE_EVERY_MS while it streams. A refresh or a
+ * dropped connection loses nothing, and a crash loses at most half a second.
  */
 
 export type TurnInput = {
@@ -34,6 +35,9 @@ export type TurnInput = {
   getDb?: typeof defaultGetDb
   tracing?: Tracing
 }
+
+/** How often the partly written answer is saved while it streams. */
+const SAVE_EVERY_MS = 500
 
 /** How many past messages of this conversation the model sees verbatim. */
 const HISTORY_MESSAGES = 20
@@ -56,7 +60,7 @@ export async function runTurn(input: TurnInput): Promise<{ messageId: number }> 
   // 2. Assistant message row up front, so tool events can reference it.
   const [assistant] = await db
     .insert(messages)
-    .values({ conversationId, role: 'assistant', text: '', createdAt: now + 1, timezone })
+    .values({ conversationId, role: 'assistant', text: '', createdAt: now + 1, timezone, status: 'streaming' })
     .returning({ id: messages.id })
 
   // 3. Context: recent turns of this conversation, oldest first.
@@ -90,6 +94,18 @@ export async function runTurn(input: TurnInput): Promise<{ messageId: number }> 
 
   // 4. The loop. Text and tool events stream out and are saved as they land.
   let answer = ''
+  let status: 'done' | 'stopped' | 'error' = 'done'
+  let lastSave = 0
+  let saving: Promise<unknown> = Promise.resolve()
+  const savePartial = () => {
+    if (Date.now() - lastSave < SAVE_EVERY_MS) return
+    lastSave = Date.now()
+    const snapshot = answer
+    // Chained so an older snapshot can never land after a newer one.
+    saving = saving
+      .then(() => db.update(messages).set({ text: snapshot }).where(eq(messages.id, assistant.id)))
+      .catch((err) => console.error('partial save failed', err))
+  }
   try {
     const tracing = input.tracing ?? (await getTracing())
     const loop = () => runAgentLoop({
@@ -102,7 +118,10 @@ export async function runTurn(input: TurnInput): Promise<{ messageId: number }> 
       tools,
       signal,
       onEvent: (e) => {
-        if (e.type === 'text_delta') answer += e.text
+        if (e.type === 'text_delta') {
+          answer += e.text
+          savePartial()
+        }
         emit(e)
       },
       onToolRun: (run) => {
@@ -124,14 +143,21 @@ export async function runTurn(input: TurnInput): Promise<{ messageId: number }> 
     // Stored answers are what recall_history returns later: keep their links valid.
     answer = cleanCitations(result.text)
   } catch (err) {
-    const message = err instanceof Error ? err.message : String(err)
-    console.error('turn failed', err)
-    emit({ type: 'error', message: friendlyError(message) })
-    if (!answer) answer = `_Something went wrong: ${friendlyError(message)}_`
+    if (signal?.aborted) {
+      // The user pressed Stop: keep what was written, it is not an error.
+      status = 'stopped'
+    } else {
+      const message = err instanceof Error ? err.message : String(err)
+      console.error('turn failed', err)
+      status = 'error'
+      emit({ type: 'error', message: friendlyError(message) })
+      if (!answer) answer = `_Something went wrong: ${friendlyError(message)}_`
+    }
   }
 
   // 5. Final answer.
-  await db.update(messages).set({ text: answer }).where(eq(messages.id, assistant.id))
+  await saving
+  await db.update(messages).set({ text: cleanCitations(answer), status }).where(eq(messages.id, assistant.id))
   emit({ type: 'turn_done', messageId: assistant.id })
   return { messageId: assistant.id }
 }

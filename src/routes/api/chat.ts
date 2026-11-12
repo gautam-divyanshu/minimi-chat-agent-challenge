@@ -1,7 +1,6 @@
 import { createFileRoute } from '@tanstack/react-router'
 import { z } from 'zod'
-import { runTurn } from '#/server/agent/harness'
-import type { AgentEvent } from '#/shared/events'
+import { startTurn, turnStream } from '#/server/agent/turns'
 
 const Body = z.object({
   conversationId: z.string().min(1).max(64).optional(),
@@ -9,8 +8,10 @@ const Body = z.object({
   timezone: z.string().max(64).default('UTC'),
 })
 
-// POST /api/chat → Server-Sent Events, one `data:` line per AgentEvent.
-// The turn keeps running if the client disconnects: it's persisted either way.
+// POST /api/chat → starts a turn and streams it as Server-Sent Events, one
+// `data:` line per AgentEvent. The turn is owned by the server: if this
+// response is cut off (refresh, closed tab), the turn keeps running and
+// GET /api/conversations/:id/stream picks it up again.
 export const Route = createFileRoute('/api/chat')({
   server: {
     handlers: {
@@ -20,38 +21,10 @@ export const Route = createFileRoute('/api/chat')({
         const { text, timezone } = parsed.data
         const conversationId = parsed.data.conversationId ?? crypto.randomUUID()
 
-        const encoder = new TextEncoder()
-        let closed = false
-        const body = new ReadableStream<Uint8Array>({
-          start(controller) {
-            const emit = (e: AgentEvent) => {
-              if (closed) return
-              try {
-                controller.enqueue(encoder.encode(`data: ${JSON.stringify(e)}\n\n`))
-              } catch {
-                closed = true // client went away; keep running, the DB has it all
-              }
-            }
-            runTurn({ conversationId, text, timezone, emit })
-              .catch((err) => emit({ type: 'error', message: err instanceof Error ? err.message : String(err) }))
-              .finally(() => {
-                if (!closed) controller.close()
-                closed = true
-              })
-          },
-          cancel() {
-            closed = true
-          },
-        })
-
-        return new Response(body, {
-          headers: {
-            'Content-Type': 'text/event-stream; charset=utf-8',
-            'Cache-Control': 'no-cache, no-transform',
-            Connection: 'keep-alive',
-            'X-Accel-Buffering': 'no',
-          },
-        })
+        if (!startTurn({ conversationId, text, timezone })) {
+          return Response.json({ error: 'This conversation is still answering the previous message.' }, { status: 409 })
+        }
+        return turnStream(conversationId) ?? new Response(null, { status: 204 })
       },
     },
   },
