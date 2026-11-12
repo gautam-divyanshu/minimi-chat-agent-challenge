@@ -98,3 +98,23 @@
     @apply h-full bg-background text-foreground antialiased;
   }
 }
+
+/* Syntax colours for code blocks (classes from highlight.js), after VS Code's
+   Light+ and Dark+ themes. */
+.hljs-comment, .hljs-quote { color: #008000; }
+.hljs-keyword, .hljs-literal, .hljs-selector-tag { color: #0000ff; }
+.hljs-built_in, .hljs-type, .hljs-title.class_ { color: #267f99; }
+.hljs-string, .hljs-regexp, .hljs-meta .hljs-string { color: #a31515; }
+.hljs-number { color: #098658; }
+.hljs-title, .hljs-title.function_ { color: #795e26; }
+.hljs-attr, .hljs-attribute, .hljs-variable, .hljs-params, .hljs-property { color: #001080; }
+.hljs-meta, .hljs-tag, .hljs-name { color: #800000; }
+
+.dark .hljs-comment, .dark .hljs-quote { color: #6a9955; }
+.dark .hljs-keyword, .dark .hljs-literal, .dark .hljs-selector-tag { color: #569cd6; }
+.dark .hljs-built_in, .dark .hljs-type, .dark .hljs-title.class_ { color: #4ec9b0; }
+.dark .hljs-string, .dark .hljs-regexp, .dark .hljs-meta .hljs-string { color: #ce9178; }
+.dark .hljs-number { color: #b5cea8; }
+.dark .hljs-title, .dark .hljs-title.function_ { color: #dcdcaa; }
+.dark .hljs-attr, .dark .hljs-attribute, .dark .hljs-variable, .dark .hljs-params, .dark .hljs-property { color: #9cdcfe; }
+.dark .hljs-meta, .dark .hljs-tag, .dark .hljs-name { color: #569cd6; }

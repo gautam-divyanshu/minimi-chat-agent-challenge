@@ -1,5 +1,6 @@
-import { createContext, memo, useContext, useMemo } from 'react'
+import { createContext, isValidElement, memo, useContext, useMemo, useRef, useState } from 'react'
 import ReactMarkdown, { type Components } from 'react-markdown'
+import rehypeHighlight from 'rehype-highlight'
 import remarkGfm from 'remark-gfm'
 import { cleanCitations } from '#/shared/citations'
 
@@ -50,8 +51,36 @@ function Link({ href, children }: { href?: string; children?: React.ReactNode })
   )
 }
 
+/** A fenced code block: language label, copy button, highlighted code. */
+function CodeBlock({ children }: { children?: React.ReactNode }) {
+  const ref = useRef<HTMLPreElement>(null)
+  const [copied, setCopied] = useState(false)
+  const className = isValidElement<{ className?: string }>(children) ? (children.props.className ?? '') : ''
+  const language = /language-([\w+#-]+)/.exec(className)?.[1] ?? 'text'
+  const copy = () => {
+    void navigator.clipboard.writeText(ref.current?.textContent ?? '').then(() => {
+      setCopied(true)
+      setTimeout(() => setCopied(false), 1500)
+    })
+  }
+  return (
+    <div className="not-prose my-3 overflow-hidden rounded-lg border bg-muted/60">
+      <div className="flex items-center justify-between border-b px-3 py-1 text-xs text-muted-foreground">
+        <span>{language}</span>
+        <button type="button" onClick={copy} className="rounded px-1.5 py-0.5 hover:bg-background hover:text-foreground">
+          {copied ? 'Copied' : 'Copy'}
+        </button>
+      </div>
+      <pre ref={ref} className="overflow-x-auto p-3 font-mono text-[13px] leading-relaxed">
+        {children}
+      </pre>
+    </div>
+  )
+}
+
 const components: Components = {
   a: Link,
+  pre: CodeBlock,
   table: ({ children }) => (
     <div className="overflow-x-auto">
       <table>{children}</table>
@@ -59,9 +88,12 @@ const components: Components = {
   ),
 }
 
+// Only blocks that name a language are coloured; guessing mis-colours plain text.
+const rehypePlugins = [rehypeHighlight]
+
 const Block = memo(function Block({ text }: { text: string }) {
   return (
-    <ReactMarkdown remarkPlugins={[remarkGfm]} components={components}>
+    <ReactMarkdown remarkPlugins={[remarkGfm]} rehypePlugins={rehypePlugins} components={components}>
       {text}
     </ReactMarkdown>
   )
