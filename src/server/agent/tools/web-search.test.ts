@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { createWebSearch, type WebSearchOptions } from './web-search'
+import { createWebSearch, searchError, type WebSearchOptions } from './web-search'
 
 type Page = { title: string; url: string; publishedDate?: string; highlights: string[] }
 
@@ -93,6 +93,15 @@ describe('web_search', () => {
   it('strips dates when the user gave no window, so the status line never shows a filter that is not applied', () => {
     const { tool } = fakeExa({ undated: [], dated: [] }, { allowDates: false, defaultSince: '2026-11-09' })
     expect(tool.refineInput!({ query: 'q', objective: 'o', since: '2026-01-01' })).toMatchObject({ since: undefined, until: undefined })
+  })
+
+  it('turns key problems into a message that says what to fix', async () => {
+    const rejected = Object.assign(new Error('Request failed'), { statusCode: 401 })
+    const bad = createWebSearch(() => ({ search: async () => { throw rejected } }) as any)
+    await expect(bad.execute({ query: 'q', objective: 'o' }, { signal })).rejects.toThrow('Exa rejected EXA_API_KEY. Check it in .env')
+    expect(searchError(new Error('EXA_API_KEY is not set. Copy .env.example'))).toBe('web search is unavailable: EXA_API_KEY is missing in .env')
+    expect(searchError(Object.assign(new Error('x'), { statusCode: 429 }))).toMatch(/rate limit or credits/)
+    expect(searchError(new Error('socket hang up'))).toBe('web search failed: socket hang up')
   })
 
   it('requires objective and real dates in the model-facing schema', () => {

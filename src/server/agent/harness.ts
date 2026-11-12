@@ -176,5 +176,6 @@ function friendlyError(message: string): string {
   if (/api key|401|unauthorized/i.test(message)) return 'the model API key was rejected. Check OPENAI_API_KEY in .env.'
   if (/is not set/.test(message)) return message
   if (/rate limit|429/i.test(message)) return 'the model is rate-limited right now. Try again in a moment.'
+  if (/model.*(does not exist|not found)|404/i.test(message)) return 'OPENAI_MODEL names a model this key cannot use. Check it in .env.'
   return message
 }

@@ -78,60 +78,87 @@ export function createWebSearch(getClient: () => ExaClient = defaultClient, opts
       if (opts.allowDates === false) return { ...input, since: undefined, until: undefined }
       return { ...input, since: since ?? opts.defaultSince, until }
     },
-    async execute({ query, objective, since, until }, { signal }): Promise<WebSearchOutput> {
-      const exa = getClient()
-      const search = (dated: boolean) =>
-        exa.search(query, {
-          type: 'auto',
-          objective,
-          ...(opts.numResults ? { numResults: opts.numResults } : {}),
-          contents: { highlights: opts.maxCharacters ? { maxCharacters: opts.maxCharacters } : true },
-          ...(dated && since ? { startPublishedDate: `${since}T00:00:00.000Z` } : {}),
-          ...(dated && until ? { endPublishedDate: `${until}T23:59:59.999Z` } : {}),
-          signal,
-        })
-      const toResult = (r: Awaited<ReturnType<typeof search>>['results'][number]): WebSearchResult => ({
-        title: r.title ?? r.url,
-        url: r.url,
-        publishedDate: r.publishedDate?.slice(0, 10),
-        author: r.author || undefined,
-        highlights: r.highlights ?? [],
-      })
-
-      const searchedAt = new Date().toISOString()
-      const wantsDates = Boolean(since || until)
-      if (!wantsDates || opts.allowDates === false) {
-        const res = await search(false)
-        return {
-          searchedAt,
-          note: wantsDates ? 'Date filter ignored: the user gave no time window. These are current results.' : undefined,
-          results: res.results.map(toResult),
-        }
-      }
-
-      // Current state and what was published in the window, side by side.
-      const [current, windowed] = await Promise.allSettled([search(false), search(true)])
-      if (current.status === 'rejected') throw current.reason
-      const range = `${since ?? 'any time'} to ${until ?? 'now'}`
-      const inRange = (d?: string) => Boolean(d && (!since || d >= since) && (!until || d <= until))
-      const results = current.value.results.map(toResult).map((r) => ({ ...r, inWindow: inRange(r.publishedDate) }))
-      const seen = new Set(results.map((r) => r.url))
-      const fresh = windowed.status === 'fulfilled' ? windowed.value.results.map(toResult).filter((r) => !seen.has(r.url)) : []
-      results.push(...fresh.map((r) => ({ ...r, inWindow: true })))
-
-      const found = results.filter((r) => r.inWindow).length
-      return {
-        searchedAt,
-        note:
-          (found
-            ? `${found} result(s) marked inWindow were published ${range}.`
-            : `No pages were published ${range}; say so rather than implying a change.`) +
-          ' The others show the current state: undated pages (pricing pages, docs) are current but do not say when they changed.',
-        results,
+    async execute(input, ctx): Promise<WebSearchOutput> {
+      try {
+        return await run(input, ctx)
+      } catch (err) {
+        throw new Error(searchError(err))
       }
     },
     sources: (out) => out.results.map((r) => ({ title: r.title, url: r.url, publishedAt: r.publishedDate })),
   })
+
+  async function run(
+    { query, objective, since, until }: { query: string; objective: string; since?: string; until?: string },
+    { signal }: { signal: AbortSignal },
+  ): Promise<WebSearchOutput> {
+    const exa = getClient()
+    const search = (dated: boolean) =>
+      exa.search(query, {
+        type: 'auto',
+        objective,
+        ...(opts.numResults ? { numResults: opts.numResults } : {}),
+        contents: { highlights: opts.maxCharacters ? { maxCharacters: opts.maxCharacters } : true },
+        ...(dated && since ? { startPublishedDate: `${since}T00:00:00.000Z` } : {}),
+        ...(dated && until ? { endPublishedDate: `${until}T23:59:59.999Z` } : {}),
+        signal,
+      })
+    const toResult = (r: Awaited<ReturnType<typeof search>>['results'][number]): WebSearchResult => ({
+      title: r.title ?? r.url,
+      url: r.url,
+      publishedDate: r.publishedDate?.slice(0, 10),
+      author: r.author || undefined,
+      highlights: r.highlights ?? [],
+    })
+
+    const searchedAt = new Date().toISOString()
+    const wantsDates = Boolean(since || until)
+    if (!wantsDates || opts.allowDates === false) {
+      const res = await search(false)
+      return {
+        searchedAt,
+        note: wantsDates ? 'Date filter ignored: the user gave no time window. These are current results.' : undefined,
+        results: res.results.map(toResult),
+      }
+    }
+
+    // Current state and what was published in the window, side by side.
+    const [current, windowed] = await Promise.allSettled([search(false), search(true)])
+    if (current.status === 'rejected') throw current.reason
+    const range = `${since ?? 'any time'} to ${until ?? 'now'}`
+    const inRange = (d?: string) => Boolean(d && (!since || d >= since) && (!until || d <= until))
+    const results = current.value.results.map(toResult).map((r) => ({ ...r, inWindow: inRange(r.publishedDate) }))
+    const seen = new Set(results.map((r) => r.url))
+    const fresh = windowed.status === 'fulfilled' ? windowed.value.results.map(toResult).filter((r) => !seen.has(r.url)) : []
+    results.push(...fresh.map((r) => ({ ...r, inWindow: true })))
+
+    const found = results.filter((r) => r.inWindow).length
+    return {
+      searchedAt,
+      note:
+        (found
+          ? `${found} result(s) marked inWindow were published ${range}.`
+          : `No pages were published ${range}; say so rather than implying a change.`) +
+        ' The others show the current state: undated pages (pricing pages, docs) are current but do not say when they changed.',
+      results,
+    }
+  }
+}
+
+/**
+ * A key problem is the one search failure the user can fix, so say exactly
+ * what to fix. The model sees this as the tool result and the UI shows it on
+ * the search row.
+ */
+export function searchError(err: unknown): string {
+  const message = err instanceof Error ? err.message : String(err)
+  const status = (err as { statusCode?: number })?.statusCode
+  if (/EXA_API_KEY is not set/.test(message)) return 'web search is unavailable: EXA_API_KEY is missing in .env'
+  if (status === 401 || status === 403 || /\b(401|403)\b|unauthori[sz]ed|forbidden|invalid api key/i.test(message))
+    return 'web search is unavailable: Exa rejected EXA_API_KEY. Check it in .env'
+  if (status === 402 || status === 429 || /credits|rate limit|quota/i.test(message))
+    return 'web search is unavailable: Exa rate limit or credits exhausted'
+  return `web search failed: ${message}`
 }
 
 let client: Exa | undefined

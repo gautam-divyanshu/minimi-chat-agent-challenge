@@ -38,10 +38,10 @@ function Row({ t }: { t: ToolCallState }) {
         <Check className="size-3.5 shrink-0 text-emerald-600" />
       )}
       <Icon className="size-3.5 shrink-0 opacity-60" />
-      <span className="truncate">{label(t)}</span>
+      <span className="truncate" title={t.error}>{label(t)}</span>
       {t.status === 'done' && (
         <span className="shrink-0 opacity-60">
-          {t.error ? (t.error === 'timeout' ? 'timed out' : 'failed') : t.tool === 'web_search' ? `${t.sources.length} results` : ''}
+          {t.error ? (t.error === 'timeout' ? 'timed out' : /unavailable/.test(t.error) ? t.error.replace('web search is unavailable: ', '') : 'failed') : t.tool === 'web_search' ? `${t.sources.length} results` : ''}
           {t.durationMs != null && ` · ${(t.durationMs / 1000).toFixed(1)}s`}
         </span>
       )}
