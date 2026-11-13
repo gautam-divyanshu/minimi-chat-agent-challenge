@@ -108,6 +108,7 @@ export async function multiTurn(data: MultiTurnData): Promise<MultiTurnResult> {
       timezone: EVAL_TZ,
       now: EVAL_NOW + i * 60_000,
       getDb: () => handle,
+      title: async () => null, // sidebar titles are not what these evals score
       tools: ({ timezone, beforeMs, allowDates, defaultSince }) => [
         createWebSearch(() => exa as any, { numResults: 5, allowDates, defaultSince }),
         createRecallHistory({ timezone, beforeMs, getDb: () => handle }),

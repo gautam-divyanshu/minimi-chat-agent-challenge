@@ -3,7 +3,7 @@ import { MockLanguageModelV4 } from 'ai/test'
 import { eq } from 'drizzle-orm'
 import { z } from 'zod'
 import { createTestDb } from '#/server/db/client'
-import { messages, toolEvents } from '#/server/db/schema'
+import { conversations, messages, toolEvents } from '#/server/db/schema'
 import type { AgentEvent } from '#/shared/events'
 import { runTurn } from './harness'
 import { defineTool } from './tool'
@@ -74,6 +74,23 @@ describe('runTurn', () => {
     const tools = await handle.db.select().from(toolEvents)
     expect(tools).toHaveLength(1)
     expect(tools[0]).toMatchObject({ messageId, tool: 'web_search', input: { query: 'neon pricing' } })
+  })
+
+  it('titles a new chat once, and keeps the message as the title if that fails', async () => {
+    const title = async (q: string) => `About: ${q}`
+    const run = (conversationId: string, text: string, t: typeof title) =>
+      runTurn({ conversationId, text, timezone: 'UTC', emit: () => {}, model: model(), tools: () => [search], getDb: () => handle, title: t })
+    const titleOf = async (id: string) => (await handle.db.select().from(conversations).where(eq(conversations.id, id)))[0].title
+
+    await run('t1', 'neon pricing', title)
+    expect(await titleOf('t1')).toBe('About: neon pricing')
+    await run('t1', 'and supabase?', title) // not the first turn: title unchanged
+    expect(await titleOf('t1')).toBe('About: neon pricing')
+
+    await run('t2', 'hello there', async () => {
+      throw new Error('model down')
+    })
+    expect(await titleOf('t2')).toBe('hello there')
   })
 
   it('falls back to UTC for an invalid timezone', async () => {

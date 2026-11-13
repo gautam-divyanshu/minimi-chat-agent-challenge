@@ -10,6 +10,7 @@ import type { AgentTool } from './tool'
 import { createRecallHistory } from './tools/recall-history'
 import { createWebSearch } from './tools/web-search'
 import { formatDateHints, mentionsTimeWindow, resolveDates } from './dates'
+import { generateTitle } from './title'
 import { getTracing, type Tracing } from './tracing'
 import { cleanCitations } from '../../shared/citations'
 
@@ -34,10 +35,15 @@ export type TurnInput = {
   tools?: (ctx: { timezone: string; beforeMs: number; allowDates: boolean; defaultSince?: string }) => AgentTool[]
   getDb?: typeof defaultGetDb
   tracing?: Tracing
+  /** Writes the sidebar title for a new chat. Off when a test model is injected and none is given. */
+  title?: (question: string) => Promise<string | null>
 }
 
 /** How often the partly written answer is saved while it streams. */
 const SAVE_EVERY_MS = 500
+
+/** How long turn_done waits for the title, so the sidebar's refresh usually finds it. */
+const TITLE_WAIT_MS = 2_000
 
 /** How many past messages of this conversation the model sees verbatim. */
 const HISTORY_MESSAGES = 20
@@ -73,6 +79,18 @@ export async function runTurn(input: TurnInput): Promise<{ messageId: number }> 
     .filter((m) => m.text !== '')
     .slice(-HISTORY_MESSAGES)
     .map((m) => ({ role: m.role, content: m.text }))
+
+  // A new chat gets a short generated title. It runs alongside the turn and
+  // never fails it; until it lands the title is the start of the message.
+  const makeTitle = input.title ?? (input.model ? undefined : generateTitle)
+  const firstTurn = history.filter((m) => m.role === 'user').length === 1
+  const titled =
+    firstTurn && makeTitle
+      ? Promise.resolve()
+          .then(() => makeTitle(text))
+          .then((title) => (title ? db.update(conversations).set({ title }).where(eq(conversations.id, conversationId)) : undefined))
+          .catch((err) => console.error('title generation failed', err instanceof Error ? err.message : err))
+      : undefined
 
   // Date filters are only available when the user named a time window, in
   // this message or the last few (so "and what about Pipedrive?" keeps one).
@@ -158,6 +176,7 @@ export async function runTurn(input: TurnInput): Promise<{ messageId: number }> 
   // 5. Final answer.
   await saving
   await db.update(messages).set({ text: cleanCitations(answer), status }).where(eq(messages.id, assistant.id))
+  if (titled) await Promise.race([titled, new Promise((r) => setTimeout(r, TITLE_WAIT_MS).unref())])
   emit({ type: 'turn_done', messageId: assistant.id })
   return { messageId: assistant.id }
 }
