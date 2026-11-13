@@ -61,7 +61,7 @@ npm run typecheck
 Needs `LMNR_PROJECT_API_KEY` ([Laminar](https://laminar.sh)); results and traces show in the Laminar dashboard, and a summary prints in the terminal.
 
 ```bash
-npm run eval:general # 14 general questions: news, how-to, lookups, follow-ups, recommendations
+npm run eval:general # 15 general questions: news, how-to, lookups, follow-ups, recommendations
 npm run eval:agent   # 18 time-and-memory turns on a seeded database, including the brief's examples
 npm run eval:tools   # 17 single-turn cases: which tool, which arguments
 npm run eval         # all three
@@ -71,7 +71,7 @@ All run the real harness with a fake search engine and a fixed clock, scored by 
 
 | | Cases fully passing | LLM judge | First word |
 |---|---|---|---|
-| General | 10 to 12 of 14 | 0.94 to 0.96 | ~6.5 s |
+| General | 10 to 12 of 15 | 0.94 to 0.98 | ~6.5 s |
 | Time and memory | 17/18 | 0.97 to 0.99 | ~7 s |
 | Tool selection | 17/17 | | |
 

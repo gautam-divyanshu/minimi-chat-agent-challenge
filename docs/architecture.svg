@@ -12,54 +12,68 @@
 <polyline points="780,90 780,160" fill="none" stroke="#c9ced6" stroke-width="1.3" stroke-linejoin="round" marker-end="url(#a)"/>
 <polyline points="780,244 780,310" fill="none" stroke="#c9ced6" stroke-width="1.3" stroke-linejoin="round" marker-end="url(#a)"/>
 <text x="790" y="279.4" font-size="12" fill="#9aa0a8">POST /api/chat</text>
-<rect x="60" y="460" width="1440" height="800" rx="0" fill="none" stroke="#5a5f66"/>
-<text x="80" y="489.1" font-size="18" fill="#d8dbe0">Agent Core: one Node process</text>
-<rect x="640" y="520" width="280" height="84" rx="18" fill="#0d2752" stroke="#27457a"/>
-<text x="780.0" y="553.1" font-size="18" fill="#a9cbff" text-anchor="middle">Turn Registry</text>
-<text x="780.0" y="576.35" font-size="13" fill="#7fa4d8" text-anchor="middle">one live turn per chat · replay on refresh</text>
-<rect x="640" y="670" width="280" height="84" rx="18" fill="#0d2752" stroke="#27457a"/>
-<text x="780.0" y="703.1" font-size="18" fill="#a9cbff" text-anchor="middle">Agent Orchestrator</text>
-<text x="780.0" y="726.35" font-size="13" fill="#7fa4d8" text-anchor="middle">harness · runTurn</text>
-<polyline points="780,394 780,520" fill="none" stroke="#c9ced6" stroke-width="1.3" stroke-linejoin="round" marker-end="url(#a)"/>
-<polyline points="780,604 780,670" fill="none" stroke="#c9ced6" stroke-width="1.3" stroke-linejoin="round" marker-end="url(#a)"/>
-<rect x="100" y="860" width="280" height="84" rx="18" fill="#0d2752" stroke="#27457a"/>
-<text x="240.0" y="893.1" font-size="18" fill="#a9cbff" text-anchor="middle">Date Resolver</text>
-<text x="240.0" y="916.35" font-size="13" fill="#7fa4d8" text-anchor="middle">chrono-node · user&#x27;s timezone</text>
-<rect x="430" y="860" width="280" height="84" rx="18" fill="#0d2752" stroke="#27457a"/>
-<text x="570.0" y="893.1" font-size="18" fill="#a9cbff" text-anchor="middle">Conversation Context</text>
-<text x="570.0" y="916.35" font-size="13" fill="#7fa4d8" text-anchor="middle">rules + last 20 messages</text>
-<rect x="760" y="860" width="300" height="84" rx="18" fill="#0d2752" stroke="#27457a"/>
-<text x="910.0" y="893.1" font-size="18" fill="#a9cbff" text-anchor="middle">LLM</text>
-<text x="910.0" y="916.35" font-size="13" fill="#7fa4d8" text-anchor="middle">OpenAI · one model · streamed</text>
-<rect x="1130" y="860" width="300" height="84" rx="18" fill="#0d2752" stroke="#27457a"/>
-<text x="1280.0" y="893.1" font-size="18" fill="#a9cbff" text-anchor="middle">Agent Loop</text>
-<text x="1280.0" y="916.35" font-size="13" fill="#7fa4d8" text-anchor="middle">≤ 6 steps · parallel tools · timeouts</text>
-<polyline points="710,754 710,800 240,800 240,860" fill="none" stroke="#c9ced6" stroke-width="1.3" stroke-linejoin="round" marker-end="url(#a)"/>
-<polyline points="770,754 770,820 570,820 570,860" fill="none" stroke="#c9ced6" stroke-width="1.3" stroke-linejoin="round" marker-end="url(#a)"/>
-<polyline points="850,754 850,810 1280,810 1280,860" fill="none" stroke="#c9ced6" stroke-width="1.3" stroke-linejoin="round" marker-end="url(#a)"/>
-<polyline points="1130,902 1060,902" fill="none" stroke="#c9ced6" stroke-width="1.3" stroke-linejoin="round" marker-end="url(#a)" marker-start="url(#a)"/>
-<text x="1058" y="921.4" font-size="12" fill="#9aa0a8">1 call per step</text>
-<ellipse cx="570.0" cy="1174.0" rx="140.0" ry="18.0" fill="#0d2752" stroke="#27457a"/>
-<rect x="430" y="1088" width="280" height="86" rx="0" fill="#0d2752" stroke="#0d2752"/>
-<polyline points="430,1088 430,1174" fill="none" stroke="#27457a" stroke-width="1.3" stroke-linejoin="round"/>
-<polyline points="710,1088 710,1174" fill="none" stroke="#27457a" stroke-width="1.3" stroke-linejoin="round"/>
-<ellipse cx="570.0" cy="1088.0" rx="140.0" ry="18.0" fill="#0d2752" stroke="#27457a"/>
-<text x="570.0" y="1131.1" font-size="18" fill="#a9cbff" text-anchor="middle">Conversation Store</text>
-<text x="570.0" y="1154.35" font-size="13" fill="#7fa4d8" text-anchor="middle">SQLite · messages · tool events · FTS5</text>
-<rect x="760" y="1080" width="300" height="84" rx="18" fill="#0d2752" stroke="#27457a"/>
-<text x="910.0" y="1113.1" font-size="18" fill="#a9cbff" text-anchor="middle">Citation Cleanup</text>
-<text x="910.0" y="1136.35" font-size="13" fill="#7fa4d8" text-anchor="middle">valid links · numbered sources in UI</text>
-<rect x="1130" y="1080" width="300" height="84" rx="18" fill="#0d2752" stroke="#27457a"/>
-<text x="1280.0" y="1113.1" font-size="18" fill="#a9cbff" text-anchor="middle">Memory Tool</text>
-<text x="1280.0" y="1136.35" font-size="13" fill="#7fa4d8" text-anchor="middle">recall_history · dates + keywords</text>
-<polyline points="570,944 570,1070" fill="none" stroke="#c9ced6" stroke-width="1.3" stroke-linejoin="round" marker-end="url(#a)" marker-start="url(#a)"/>
-<polyline points="910,944 910,1080" fill="none" stroke="#c9ced6" stroke-width="1.3" stroke-linejoin="round" marker-end="url(#a)"/>
-<text x="920" y="996.4" font-size="12" fill="#9aa0a8">answer text</text>
-<polyline points="1280,944 1280,1080" fill="none" stroke="#c9ced6" stroke-width="1.3" stroke-linejoin="round" marker-end="url(#a)"/>
-<polyline points="1280,1164 1280,1220 570,1220 570,1194" fill="none" stroke="#c9ced6" stroke-width="1.3" stroke-linejoin="round" marker-end="url(#a)"/>
-<text x="880" y="1211.4" font-size="12" fill="#9aa0a8">reads past chats</text>
-<polyline points="640,712 30,712 30,202 640,202" fill="none" stroke="#c9ced6" stroke-width="1.3" stroke-linejoin="round" marker-end="url(#a)"/>
+<rect x="60" y="450" width="1440" height="800" rx="0" fill="none" stroke="#5a5f66"/>
+<text x="80" y="477.1" font-size="18" fill="#d8dbe0">Agent Core: one Node process</text>
+<rect x="90" y="495" width="1380" height="225" rx="18" fill="none" stroke="#4a5568"/>
+<text x="104" y="708.35" font-size="13" fill="#e2c275">TURN MANAGEMENT</text>
+<text x="230.0" y="708.35" font-size="13" fill="#9aa0a8">owns persistence, streaming, cancellation and recovery</text>
+<ellipse cx="270.0" cy="639.0" rx="140.0" ry="18.0" fill="#0d2752" stroke="#27457a"/>
+<rect x="130" y="553" width="280" height="86" rx="0" fill="#0d2752" stroke="#0d2752"/>
+<polyline points="130,553 130,639" fill="none" stroke="#27457a" stroke-width="1.3" stroke-linejoin="round"/>
+<polyline points="410,553 410,639" fill="none" stroke="#27457a" stroke-width="1.3" stroke-linejoin="round"/>
+<ellipse cx="270.0" cy="553.0" rx="140.0" ry="18.0" fill="#0d2752" stroke="#27457a"/>
+<text x="270.0" y="596.1" font-size="18" fill="#a9cbff" text-anchor="middle">Conversation Store</text>
+<text x="270.0" y="619.35" font-size="13" fill="#7fa4d8" text-anchor="middle">SQLite · messages · tool events · FTS5</text>
+<rect x="500" y="560" width="300" height="84" rx="18" fill="#0d2752" stroke="#27457a"/>
+<text x="650.0" y="593.1" font-size="18" fill="#a9cbff" text-anchor="middle">Turn Registry</text>
+<text x="650.0" y="616.35" font-size="13" fill="#7fa4d8" text-anchor="middle">one live turn per chat · event log</text>
+<rect x="900" y="560" width="300" height="84" rx="18" fill="#0d2752" stroke="#27457a"/>
+<text x="1050.0" y="593.1" font-size="18" fill="#a9cbff" text-anchor="middle">Agent Orchestrator</text>
+<text x="1050.0" y="616.35" font-size="13" fill="#7fa4d8" text-anchor="middle">harness · runTurn</text>
+<polyline points="780,394 780,520 700,520 700,560" fill="none" stroke="#c9ced6" stroke-width="1.3" stroke-linejoin="round" marker-end="url(#a)"/>
+<polyline points="800,602 900,602" fill="none" stroke="#c9ced6" stroke-width="1.3" stroke-linejoin="round" marker-end="url(#a)"/>
+<polyline points="960,644 960,672 270,672 270,657" fill="none" stroke="#c9ced6" stroke-width="1.3" stroke-linejoin="round" marker-end="url(#a)" marker-start="url(#a)"/>
+<text x="430" y="663.4" font-size="12" fill="#9aa0a8">load history · save answer every 500 ms</text>
+<polyline points="600,560 600,430 30,430 30,202 640,202" fill="none" stroke="#c9ced6" stroke-width="1.3" stroke-linejoin="round" marker-end="url(#a)"/>
 <text x="44" y="191.4" font-size="12" fill="#9aa0a8">SSE events: tool_started · tool_finished · text_delta · turn_done</text>
+<rect x="90" y="790" width="1380" height="190" rx="18" fill="none" stroke="#4a5568"/>
+<text x="104" y="968.35" font-size="13" fill="#e2c275">AGENT ORCHESTRATION</text>
+<text x="263.6" y="968.35" font-size="13" fill="#9aa0a8">decides what to do next, runs the loop, decides when to stop</text>
+<rect x="150" y="830" width="280" height="84" rx="18" fill="#0d2752" stroke="#27457a"/>
+<text x="290.0" y="863.1" font-size="18" fill="#a9cbff" text-anchor="middle">Date Resolver</text>
+<text x="290.0" y="886.35" font-size="13" fill="#7fa4d8" text-anchor="middle">chrono-node · user&#x27;s timezone</text>
+<rect x="470" y="830" width="280" height="84" rx="18" fill="#0d2752" stroke="#27457a"/>
+<text x="610.0" y="863.1" font-size="18" fill="#a9cbff" text-anchor="middle">Conversation Context</text>
+<text x="610.0" y="886.35" font-size="13" fill="#7fa4d8" text-anchor="middle">rules + last 20 messages</text>
+<rect x="790" y="830" width="280" height="84" rx="18" fill="#0d2752" stroke="#27457a"/>
+<text x="930.0" y="863.1" font-size="18" fill="#a9cbff" text-anchor="middle">LLM</text>
+<text x="930.0" y="886.35" font-size="13" fill="#7fa4d8" text-anchor="middle">OpenAI · one model · streamed</text>
+<rect x="1130" y="830" width="300" height="84" rx="18" fill="#0d2752" stroke="#27457a"/>
+<text x="1280.0" y="863.1" font-size="18" fill="#a9cbff" text-anchor="middle">Agent Loop</text>
+<text x="1280.0" y="886.35" font-size="13" fill="#7fa4d8" text-anchor="middle">≤ 6 steps · last step must answer</text>
+<polyline points="1010,644 1010,735 290,735 290,830" fill="none" stroke="#c9ced6" stroke-width="1.3" stroke-linejoin="round" marker-end="url(#a)"/>
+<polyline points="1050,644 1050,750 610,750 610,830" fill="none" stroke="#c9ced6" stroke-width="1.3" stroke-linejoin="round" marker-end="url(#a)"/>
+<polyline points="1090,644 1090,765 1280,765 1280,830" fill="none" stroke="#c9ced6" stroke-width="1.3" stroke-linejoin="round" marker-end="url(#a)"/>
+<polyline points="1130,872 1070,872" fill="none" stroke="#c9ced6" stroke-width="1.3" stroke-linejoin="round" marker-end="url(#a)" marker-start="url(#a)"/>
+<text x="1040" y="931.4" font-size="12" fill="#9aa0a8">1 call per step</text>
+<rect x="90" y="1030" width="1380" height="190" rx="18" fill="none" stroke="#4a5568"/>
+<text x="104" y="1208.35" font-size="13" fill="#e2c275">TOOL EXECUTION</text>
+<text x="221.60000000000002" y="1208.35" font-size="13" fill="#9aa0a8">validates requests, runs tools in parallel, enforces timeouts, returns observations</text>
+<rect x="150" y="1070" width="300" height="84" rx="18" fill="#0d2752" stroke="#27457a"/>
+<text x="300.0" y="1103.1" font-size="18" fill="#a9cbff" text-anchor="middle">Memory Tool</text>
+<text x="300.0" y="1126.35" font-size="13" fill="#7fa4d8" text-anchor="middle">recall_history · dates + keywords</text>
+<rect x="640" y="1070" width="300" height="84" rx="18" fill="#0d2752" stroke="#27457a"/>
+<text x="790.0" y="1103.1" font-size="18" fill="#a9cbff" text-anchor="middle">Tool Runner</text>
+<text x="790.0" y="1126.35" font-size="13" fill="#7fa4d8" text-anchor="middle">validate · run in parallel · errors as results</text>
+<rect x="1130" y="1070" width="300" height="84" rx="18" fill="#0d2752" stroke="#27457a"/>
+<text x="1280.0" y="1103.1" font-size="18" fill="#a9cbff" text-anchor="middle">Web Search Tool</text>
+<text x="1280.0" y="1126.35" font-size="13" fill="#7fa4d8" text-anchor="middle">web_search · 15 s timeout per call</text>
+<polyline points="1230,914 1230,1005 790,1005 790,1070" fill="none" stroke="#c9ced6" stroke-width="1.3" stroke-linejoin="round" marker-end="url(#a)" marker-start="url(#a)"/>
+<text x="940" y="996.4" font-size="12" fill="#9aa0a8">tool calls / results</text>
+<polyline points="640,1112 450,1112" fill="none" stroke="#c9ced6" stroke-width="1.3" stroke-linejoin="round" marker-end="url(#a)"/>
+<polyline points="940,1112 1130,1112" fill="none" stroke="#c9ced6" stroke-width="1.3" stroke-linejoin="round" marker-end="url(#a)"/>
+<polyline points="150,1112 108,1112 108,596 130,596" fill="none" stroke="#c9ced6" stroke-width="1.3" stroke-linejoin="round" marker-end="url(#a)"/>
+<text x="112" y="1011.4" font-size="12" fill="#9aa0a8">reads past chats</text>
 <rect x="1600" y="20" width="320" height="84" rx="18" fill="#0d2752" stroke="#27457a"/>
 <text x="1760.0" y="53.099999999999994" font-size="18" fill="#a9cbff" text-anchor="middle">Exa Search API</text>
 <text x="1760.0" y="76.35" font-size="13" fill="#7fa4d8" text-anchor="middle">external</text>
@@ -69,20 +83,15 @@
 <rect x="1600" y="320" width="320" height="84" rx="18" fill="#0d2752" stroke="#27457a"/>
 <text x="1760.0" y="353.1" font-size="18" fill="#a9cbff" text-anchor="middle">Merge &amp; Deduplicate</text>
 <text x="1760.0" y="376.35" font-size="13" fill="#7fa4d8" text-anchor="middle">undated + date-filtered query · inWindow</text>
-<rect x="1600" y="860" width="320" height="84" rx="18" fill="#0d2752" stroke="#27457a"/>
-<text x="1760.0" y="893.1" font-size="18" fill="#a9cbff" text-anchor="middle">Web Search Tool</text>
-<text x="1760.0" y="916.35" font-size="13" fill="#7fa4d8" text-anchor="middle">web_search · N calls in parallel · 15 s timeout</text>
-<polyline points="1430,902 1600,902" fill="none" stroke="#c9ced6" stroke-width="1.3" stroke-linejoin="round" marker-end="url(#a)"/>
-<text x="1508" y="921.4" font-size="12" fill="#9aa0a8">tool calls</text>
-<polyline points="1920,902 1970,902 1970,62 1920,62" fill="none" stroke="#c9ced6" stroke-width="1.3" stroke-linejoin="round" marker-end="url(#a)"/>
-<text x="1978" y="451.4" font-size="12" fill="#9aa0a8">2 queries per search</text>
+<polyline points="1430,1126 1990,1126 1990,62 1920,62" fill="none" stroke="#c9ced6" stroke-width="1.3" stroke-linejoin="round" marker-end="url(#a)"/>
+<text x="1998" y="571.4" font-size="12" fill="#9aa0a8">2 queries per dated search</text>
 <polyline points="1760,104 1760,170" fill="none" stroke="#c9ced6" stroke-width="1.3" stroke-linejoin="round" marker-end="url(#a)"/>
 <polyline points="1760,254 1760,320" fill="none" stroke="#c9ced6" stroke-width="1.3" stroke-linejoin="round" marker-end="url(#a)"/>
-<polyline points="1760,404 1760,860" fill="none" stroke="#c9ced6" stroke-width="1.3" stroke-linejoin="round" marker-end="url(#a)"/>
-<text x="1770" y="631.4" font-size="12" fill="#9aa0a8">results</text>
-<rect x="1600" y="1300" width="320" height="84" rx="18" fill="#0d2752" stroke="#27457a"/>
-<text x="1760.0" y="1333.1" font-size="18" fill="#a9cbff" text-anchor="middle">Traces · Evaluations</text>
-<text x="1760.0" y="1356.35" font-size="13" fill="#7fa4d8" text-anchor="middle">Laminar · 49 eval cases · optional</text>
-<polyline points="920,712 1545,712 1545,1342 1600,1342" fill="none" stroke="#c9ced6" stroke-width="1.3" stroke-linejoin="round" stroke-dasharray="6 5" marker-end="url(#a)"/>
-<polyline points="1760,944 1760,1300" fill="none" stroke="#c9ced6" stroke-width="1.3" stroke-linejoin="round" stroke-dasharray="6 5" marker-end="url(#a)"/>
+<polyline points="1760,404 1760,1098 1430,1098" fill="none" stroke="#c9ced6" stroke-width="1.3" stroke-linejoin="round" marker-end="url(#a)"/>
+<text x="1770" y="711.4" font-size="12" fill="#9aa0a8">results</text>
+<rect x="1600" y="1290" width="320" height="84" rx="18" fill="#0d2752" stroke="#27457a"/>
+<text x="1760.0" y="1323.1" font-size="18" fill="#a9cbff" text-anchor="middle">Traces · Evaluations</text>
+<text x="1760.0" y="1346.35" font-size="13" fill="#7fa4d8" text-anchor="middle">Laminar · 50 eval cases · optional</text>
+<polyline points="790,1154 790,1332 1600,1332" fill="none" stroke="#c9ced6" stroke-width="1.3" stroke-linejoin="round" stroke-dasharray="6 5" marker-end="url(#a)"/>
+<text x="900" y="1321.4" font-size="12" fill="#9aa0a8">a span per model step and tool call</text>
 </svg>
