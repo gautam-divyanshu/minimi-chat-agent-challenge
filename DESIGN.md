@@ -67,5 +67,16 @@ In the order I would spend the week:
 3. **Speed:** evaluate a smaller, faster planner for the first step and remove unnecessary model round trips.
 4. **Reliability:** persist per-step checkpoints so interrupted turns resume safely, which is also the path to more than one process.
 5. **Regression prevention:** run the evals in CI and add adversarial date and source-attribution cases. The first eval set was biased toward pricing and date questions; the general set corrects that.
+6. **Document upload:** let the user attach PDFs and text files. Extract the text, split it into passages, and index them in the same SQLite FTS5 store as past conversations, so the existing memory tool can search them and answers can cite a file and page next to web sources. Uploaded text is untrusted data, like search results.
 
 The priority is better evidence, then quality and speed, not more agents or infrastructure.
+
+### Scaling, when it is needed
+
+I would not spend this week on infrastructure: nothing above is blocked by it, and a single process serves a single user well. If the agent had to serve many users, three things break first, in this order:
+
+1. **Running turns live in one process's memory.** A second server cannot replay or stop a turn it did not start. Move the turn's event log to a shared store (Postgres or Redis streams); the reattach protocol stays the same.
+2. **SQLite is one file with one writer.** Move to Postgres, with its full-text search in place of FTS5. The schema is plain columns and UTC timestamps, so it ports directly.
+3. **There are no users.** Add authentication, scope every query by user, and rate-limit per user, because each turn spends money on the model and on search.
+
+The agent loop, the tools and the event protocol do not change in any of these steps, which is the reason the harness is kept free of framework and storage details.

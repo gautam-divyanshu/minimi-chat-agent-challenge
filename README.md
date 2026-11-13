@@ -2,6 +2,18 @@
 
 A chat agent you can talk to in the browser. It has one external tool, web search (Exa), plus its own memory of past conversations, so it can also answer questions like "What did I ask you on 3 November? Is your answer still correct today?"
 
+## What it does
+
+- **Searches the web and cites it.** Independent lookups run in parallel; sources show as numbered chips under the answer.
+- **Streams as it works.** You see each search start and finish, then the answer word by word. Refresh mid-answer and it carries on; Stop keeps what was written.
+- **Knows what day it is.** "Since Monday" and "last Tuesday" are resolved to exact dates in your timezone before the model runs.
+- **Remembers past chats.** It can recall what you asked on a given day and check whether its answer still holds. On a fresh database it says it has no record.
+- **Names each chat** with a short generated title.
+
+How it is built and why: [DESIGN.md](DESIGN.md).
+
+![Architecture](docs/architecture.svg)
+
 ## Run it
 
 Requires Node 22.13 or newer.
@@ -46,6 +58,7 @@ SQLite: conversations · messages · tool_events · messages_fts (FTS5)
 - `src/server/agent/harness.ts`: one chat turn end to end; used by the HTTP route, tests and evals.
 - `src/server/agent/dates.ts`: relative dates → exact days in the user's timezone (chrono-node).
 - `src/server/agent/turns.ts`: running turns, independent of the browser connection (refresh, stop).
+- `src/server/agent/title.ts`: a short title for each new chat, generated alongside the first answer.
 - `src/client/useAgentStream.ts`: reads the event stream in the browser.
 
 ## Tests

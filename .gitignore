@@ -16,3 +16,6 @@ todos.json
 *.db-*
 harness-engineering
 evals/results/
+# local assistant notes
+claude.md
+CLAUDE.md
