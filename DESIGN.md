@@ -31,7 +31,7 @@ Search results and recalled conversations are treated as untrusted data, never a
 
 ## Why this design
 
-The first version took about **22.8 seconds to first word**. Search itself took roughly 1.6 seconds; most of the delay came from model planning and reasoning. Reducing search results from ten to five, returning concise highlights instead of full pages, lowering reasoning and verbosity, and streaming events brought first-word latency to roughly **seven seconds**. Medium reasoning increased it to around 19.5 seconds, so it was reverted.
+The first version took about **22.8 seconds to first word**. Search itself took roughly 1.6 seconds; most of the delay came from model planning and reasoning. Reducing search results from ten to five, returning concise highlights instead of full pages, lowering reasoning and verbosity, and streaming events brought first-word latency to roughly **seven to ten seconds** for a searched answer, and about three for one that needs no search. Medium reasoning increased it to around 19.5 seconds, so it was reverted.
 
 The main design choice is to keep the agent loop explicit and small. This gives the application control over latency, parallel tool calls, timeouts, errors, cancellation, and the maximum amount of work a turn can perform. A single Node process is sufficient for the current local, single-user workload.
 

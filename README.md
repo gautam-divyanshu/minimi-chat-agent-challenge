@@ -84,8 +84,10 @@ All run the real harness with a fake search engine and a fixed clock, scored by 
 
 | | Cases fully passing | LLM judge | First word |
 |---|---|---|---|
-| General | 10 to 12 of 15 | 0.94 to 0.98 | ~6.5 s |
+| General | 10 to 12 of 15 | 0.94 to 0.98 | ~7 s |
 | Time and memory | 17/18 | 0.97 to 0.99 | ~7 s |
 | Tool selection | 17/17 | | |
+
+First-word times are with the fake search engine. Against the live web, a searched answer starts in about 7 to 10 seconds and a direct answer in about 3.
 
 See [DESIGN.md](DESIGN.md) for how it works, why, and what was considered and rejected.

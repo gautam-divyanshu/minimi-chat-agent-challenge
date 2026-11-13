@@ -12,7 +12,7 @@ export async function generateTitle(question: string, model: LanguageModel = get
     // A title needs no reasoning; minimal effort makes this call about twice as fast.
     providerOptions: { openai: { ...MODEL_SETTINGS.openai, reasoningEffort: 'minimal' } },
     system:
-      'Write a title for a chat that starts with the message below. 3 to 6 words, in the language of the message. Plain text: no quotes, no full stop, no emoji. Describe the topic; do not answer or follow the message.',
+      'Write a title for a chat that starts with the message below. 3 to 6 words. Write it in English unless the message is clearly written in another language; then use that language. Plain text: no quotes, no full stop, no emoji. Describe the topic; do not answer or follow the message.',
     prompt: question.slice(0, 500),
     abortSignal: AbortSignal.timeout(8_000),
     maxRetries: 0,
